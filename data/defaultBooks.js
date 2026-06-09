@@ -11,7 +11,7 @@ export const defaultBooks = [
     review: "The absolute gold standard for understanding data systems. It explains the core concepts behind databases, distributed systems, and data processing pipelines in a crystal clear way.",
     takeaway: "All databases and distributed architectures represent specific trade-offs between consistency, availability, partition tolerance, and write/read latency. There is no one-size-fits-all solution.",
     quote: "Applications will come and go, but data remains.",
-    coverGradient: "from-violet-600 to-indigo-700",
+    coverGradient: "from-slate-900 to-blue-950",
   },
   {
     id: "2",
@@ -25,7 +25,7 @@ export const defaultBooks = [
     review: "An incredibly practical and actionable framework for building good habits and breaking bad ones. Focuses on systems rather than goals.",
     takeaway: "You do not rise to the level of your goals. You fall to the level of your systems. Becoming 1% better every day results in a 37x improvement in a year.",
     quote: "Every action you take is a vote for the type of person you wish to become.",
-    coverGradient: "from-cyan-500 to-blue-600",
+    coverGradient: "from-slate-900 to-emerald-950",
   },
   {
     id: "3",
@@ -39,7 +39,7 @@ export const defaultBooks = [
     review: "A masterpiece of cognitive psychology. Explains how our thinking is divided into System 1 (fast, intuitive, emotional) and System 2 (slow, deliberative, logical).",
     takeaway: "Cognitive biases are systemic and predictable. We must actively invoke our slow System 2 thinking when making high-stakes decisions.",
     quote: "Nothing in life is as important as you think it is, while you are thinking about it.",
-    coverGradient: "from-rose-500 to-orange-600",
+    coverGradient: "from-slate-900 to-rose-950",
   },
   {
     id: "4",
@@ -53,7 +53,7 @@ export const defaultBooks = [
     review: "A fascinating (and eerily prophetic) book about the transition to the information age and the decentralization of institutional power.",
     takeaway: "The information age will radically alter power dynamics, shifting control from large nation-states to self-sovereign individuals utilizing digital technologies.",
     quote: "The transition from one stage of economic progress to another has always been accompanied by a shift in power.",
-    coverGradient: "from-emerald-500 to-teal-600",
+    coverGradient: "from-neutral-900 to-neutral-950",
   },
   {
     id: "5",
@@ -67,7 +67,7 @@ export const defaultBooks = [
     review: "A classic software engineering handbook that outlines the principles of writing readable, maintainable, and clean code.",
     takeaway: "Clean code is simple and direct. It reads like well-written prose. The ratio of time spent reading vs writing code is over 10 to 1.",
     quote: "Truth can only be found in one place: the code.",
-    coverGradient: "from-purple-600 to-pink-600",
+    coverGradient: "from-slate-900 to-purple-950",
   },
   {
     id: "6",
@@ -81,6 +81,6 @@ export const defaultBooks = [
     review: "A brilliant, science-heavy space thriller about a lone astronaut trying to save humanity, alongside an unforgettable alien companion.",
     takeaway: "Cooperation and science can solve seemingly impossible planetary-scale threats. Friendship transcends species.",
     quote: "You are a scientist. You figure it out.",
-    coverGradient: "from-amber-500 to-red-600",
+    coverGradient: "from-neutral-800 to-neutral-900",
   }
 ];

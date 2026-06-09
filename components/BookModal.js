@@ -3,12 +3,12 @@ import { useState, useEffect } from "react";
 import { X, Star, Plus } from "lucide-react";
 
 const GRADIENT_PRESETS = [
-  { name: "Blue",    value: "from-blue-600 to-indigo-700" },
-  { name: "Cyan",    value: "from-cyan-500 to-blue-600" },
-  { name: "Rose",    value: "from-rose-500 to-orange-600" },
-  { name: "Green",   value: "from-emerald-500 to-teal-600" },
-  { name: "Purple",  value: "from-purple-600 to-pink-600" },
-  { name: "Amber",   value: "from-amber-500 to-red-600" },
+  { name: "Slate",      value: "from-neutral-800 to-neutral-900" },
+  { name: "Navy",       value: "from-slate-900 to-blue-950" },
+  { name: "Forest",     value: "from-slate-900 to-emerald-950" },
+  { name: "Wine",       value: "from-slate-900 to-rose-950" },
+  { name: "Charcoal",   value: "from-neutral-900 to-neutral-950" },
+  { name: "Aubergine",  value: "from-slate-900 to-purple-950" },
 ];
 
 const MONTHS = [

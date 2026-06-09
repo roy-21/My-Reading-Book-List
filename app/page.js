@@ -131,7 +131,7 @@ export default function Home() {
       <div className="relative z-10 max-w-6xl mx-auto px-6 py-12">
         
         {/* Navigation Bar */}
-        <nav className="flex items-center justify-between mb-16 animate-fade-in">
+        <nav className="flex items-center justify-between mb-16">
           <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setActiveView("shelf")}>
             <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg">
               <BookOpen size={18} className="text-white" />
@@ -165,18 +165,18 @@ export default function Home() {
 
         {/* Hero Section */}
         <section className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 surface px-4 py-1.5 rounded-full text-xs text-gray-400 mb-8 animate-slide-up">
+          <div className="inline-flex items-center gap-2 surface px-4 py-1.5 rounded-full text-xs text-gray-400 mb-8">
             <Sparkles size={12} className="text-blue-400" />
             <span>Interactive portfolio of books, reflections, and insights</span>
           </div>
 
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6 leading-tight animate-slide-up delay-100">
+          <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6 leading-tight">
             Reading Shapes
             <br />
             <span className="gradient-text">Perspective</span>
           </h1>
 
-          <p className="text-gray-400 text-sm md:text-base max-w-2xl mx-auto leading-relaxed animate-slide-up delay-200">
+          <p className="text-gray-400 text-sm md:text-base max-w-2xl mx-auto leading-relaxed">
             A curated log of my educational readings, reviews, and insights. Filter through categories, 
             explore rating trends, or check stats on genres and timeline logs below.
           </p>
@@ -184,8 +184,8 @@ export default function Home() {
 
         {/* Dynamic Quote Spotlight */}
         {spotlightBook && activeView === "shelf" && (
-          <section className="surface p-6 md:p-8 mb-16 max-w-3xl mx-auto relative overflow-hidden animate-slide-up delay-300">
-            <div className="absolute top-4 left-4 text-blue-500/10">
+          <section className="surface p-6 md:p-8 mb-16 max-w-3xl mx-auto relative overflow-hidden">
+            <div className="absolute top-4 left-4 text-neutral-800/20">
               <QuoteIcon size={80} />
             </div>
             <div className="relative z-10 text-center space-y-4">
@@ -221,7 +221,7 @@ export default function Home() {
           </div>
         ) : (
           /* Render Book Shelf view */
-          <div className="space-y-8 animate-fade-in">
+          <div className="space-y-8">
             
             {/* Quick Stats Grid */}
             <div className="grid grid-cols-3 gap-4 mb-8">
