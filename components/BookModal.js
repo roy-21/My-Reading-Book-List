@@ -1,288 +1,195 @@
 "use client";
 import { useState, useEffect } from "react";
-import { X, Star, Sparkles } from "lucide-react";
+import { X, Star, Plus } from "lucide-react";
 
 const GRADIENT_PRESETS = [
-  { name: "Neon Dusk", value: "from-violet-600 to-indigo-700" },
-  { name: "Ocean Breeze", value: "from-cyan-500 to-blue-600" },
-  { name: "Sunset Glow", value: "from-rose-500 to-orange-600" },
-  { name: "Forest Moss", value: "from-emerald-500 to-teal-600" },
-  { name: "Cyberpunk Pink", value: "from-purple-600 to-pink-600" },
-  { name: "Golden Lava", value: "from-amber-500 to-red-600" },
+  { name: "Blue",    value: "from-blue-600 to-indigo-700" },
+  { name: "Cyan",    value: "from-cyan-500 to-blue-600" },
+  { name: "Rose",    value: "from-rose-500 to-orange-600" },
+  { name: "Green",   value: "from-emerald-500 to-teal-600" },
+  { name: "Purple",  value: "from-purple-600 to-pink-600" },
+  { name: "Amber",   value: "from-amber-500 to-red-600" },
 ];
 
 const MONTHS = [
   "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December"
+  "July", "August", "September", "October", "November", "December",
 ];
 
 const GENRES = [
-  "Technology", "Self-Growth", "Psychology", "Philosophy", 
-  "Fiction", "Science", "History", "Biography", "Business", "Other"
+  "Technology", "Self-Growth", "Psychology", "Philosophy",
+  "Fiction", "Science", "History", "Biography", "Business", "Other",
 ];
 
-export default function BookModal({ isOpen, onClose, onSave, bookToEdit }) {
-  const [title, setTitle] = useState("");
-  const [author, setAuthor] = useState("");
-  const [genre, setGenre] = useState("Technology");
-  const [status, setStatus] = useState("completed");
-  const [rating, setRating] = useState(5);
-  const [startYear, setStartYear] = useState(new Date().getFullYear());
-  const [startMonth, setStartMonth] = useState(MONTHS[new Date().getMonth()]);
-  const [review, setReview] = useState("");
-  const [takeaway, setTakeaway] = useState("");
-  const [quote, setQuote] = useState("");
-  const [coverGradient, setCoverGradient] = useState(GRADIENT_PRESETS[0].value);
+const INITIAL_STATE = {
+  title: "", author: "", genre: "Technology", status: "completed",
+  rating: 5, startYear: new Date().getFullYear(),
+  startMonth: MONTHS[new Date().getMonth()],
+  review: "", takeaway: "", quote: "",
+  coverGradient: GRADIENT_PRESETS[0].value,
+};
 
-  // Sync state if editing a book
+export default function BookModal({ isOpen, onClose, onSave, bookToEdit }) {
+  const [form, setForm] = useState(INITIAL_STATE);
+
   useEffect(() => {
     if (bookToEdit) {
-      setTitle(bookToEdit.title || "");
-      setAuthor(bookToEdit.author || "");
-      setGenre(bookToEdit.genre || "Technology");
-      setStatus(bookToEdit.status || "completed");
-      setRating(bookToEdit.rating || 5);
-      setStartYear(bookToEdit.startYear || new Date().getFullYear());
-      setStartMonth(bookToEdit.startMonth || MONTHS[new Date().getMonth()]);
-      setReview(bookToEdit.review || "");
-      setTakeaway(bookToEdit.takeaway || "");
-      setQuote(bookToEdit.quote || "");
-      setCoverGradient(bookToEdit.coverGradient || GRADIENT_PRESETS[0].value);
+      setForm({
+        title: bookToEdit.title || "",
+        author: bookToEdit.author || "",
+        genre: bookToEdit.genre || "Technology",
+        status: bookToEdit.status || "completed",
+        rating: bookToEdit.rating || 5,
+        startYear: bookToEdit.startYear || new Date().getFullYear(),
+        startMonth: bookToEdit.startMonth || MONTHS[new Date().getMonth()],
+        review: bookToEdit.review || "",
+        takeaway: bookToEdit.takeaway || "",
+        quote: bookToEdit.quote || "",
+        coverGradient: bookToEdit.coverGradient || GRADIENT_PRESETS[0].value,
+      });
     } else {
-      // Clear form for addition
-      setTitle("");
-      setAuthor("");
-      setGenre("Technology");
-      setStatus("completed");
-      setRating(5);
-      setStartYear(new Date().getFullYear());
-      setStartMonth(MONTHS[new Date().getMonth()]);
-      setReview("");
-      setTakeaway("");
-      setQuote("");
-      setCoverGradient(GRADIENT_PRESETS[0].value);
+      setForm(INITIAL_STATE);
     }
   }, [bookToEdit, isOpen]);
 
   if (!isOpen) return null;
 
+  const update = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!title.trim() || !author.trim()) return;
+    if (!form.title.trim() || !form.author.trim()) return;
 
-    const savedBook = {
+    onSave({
       id: bookToEdit ? bookToEdit.id : Date.now().toString(),
-      title,
-      author,
-      genre,
-      status,
-      rating: Number(rating),
-      startYear: Number(startYear),
-      startMonth,
-      review,
-      takeaway,
-      quote,
-      coverGradient,
-    };
-    onSave(savedBook);
+      ...form,
+      rating: Number(form.rating),
+      startYear: Number(form.startYear),
+    });
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md px-4 overflow-y-auto py-8">
-      <div 
-        className="glass w-full max-w-2xl overflow-hidden border border-white/10 shadow-2xl relative flex flex-col my-auto max-h-[90vh]"
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4 overflow-y-auto py-8">
+      <div
+        className="surface w-full max-w-2xl overflow-hidden border border-base-700 shadow-2xl relative flex flex-col my-auto max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-white/5">
+        <div className="flex items-center justify-between p-5 border-b border-base-700">
           <div className="flex items-center gap-2">
-            <Sparkles size={18} className="text-violet-400" />
-            <h2 className="text-lg font-semibold text-slate-100">
-              {bookToEdit ? "Edit Book Details" : "Add New Book to Shelf"}
+            <Plus size={16} className="text-blue-400" />
+            <h2 className="text-base font-semibold text-gray-100">
+              {bookToEdit ? "Edit Book" : "Add New Book"}
             </h2>
           </div>
-          <button 
-            onClick={onClose} 
-            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
-          >
-            <X size={18} />
+          <button onClick={onClose} className="p-1 rounded text-gray-500 hover:text-white transition-colors">
+            <X size={16} />
           </button>
         </div>
 
-        {/* Scrollable Form */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-5">
-          
-          {/* Row 1: Title & Author */}
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-4">
+
+          {/* Title & Author */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Book Title *</label>
-              <input 
-                type="text" 
-                required
-                value={title} 
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g. Clean Code"
-                className="input-glass"
-              />
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Title *</label>
+              <input type="text" required value={form.title} onChange={(e) => update("title", e.target.value)}
+                placeholder="e.g. Clean Code" className="input-dark" />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Author *</label>
-              <input 
-                type="text" 
-                required
-                value={author} 
-                onChange={(e) => setAuthor(e.target.value)}
-                placeholder="e.g. Robert C. Martin"
-                className="input-glass"
-              />
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Author *</label>
+              <input type="text" required value={form.author} onChange={(e) => update("author", e.target.value)}
+                placeholder="e.g. Robert C. Martin" className="input-dark" />
             </div>
           </div>
 
-          {/* Row 2: Genre & Status */}
+          {/* Genre & Status */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Genre</label>
-              <select 
-                value={genre} 
-                onChange={(e) => setGenre(e.target.value)}
-                className="input-glass cursor-pointer"
-              >
-                {GENRES.map((g) => (
-                  <option key={g} value={g} className="bg-space-900">{g}</option>
-                ))}
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Genre</label>
+              <select value={form.genre} onChange={(e) => update("genre", e.target.value)} className="input-dark cursor-pointer">
+                {GENRES.map((g) => <option key={g} value={g} className="bg-black">{g}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Reading Status</label>
-              <select 
-                value={status} 
-                onChange={(e) => setStatus(e.target.value)}
-                className="input-glass cursor-pointer"
-              >
-                <option value="completed" className="bg-space-900">Completed</option>
-                <option value="reading" className="bg-space-900">Currently Reading</option>
-                <option value="to-read" className="bg-space-900">To Read</option>
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Status</label>
+              <select value={form.status} onChange={(e) => update("status", e.target.value)} className="input-dark cursor-pointer">
+                <option value="completed" className="bg-black">Completed</option>
+                <option value="reading" className="bg-black">Currently Reading</option>
+                <option value="to-read" className="bg-black">To Read</option>
               </select>
             </div>
           </div>
 
-          {/* Row 3: Rating, Year & Month */}
+          {/* Rating, Year, Month */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Your Rating</label>
-              <div className="flex items-center gap-1 bg-space-900/60 border border-white/8 rounded-lg px-3 py-2">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    type="button"
-                    onClick={() => setRating(star)}
-                    className="text-slate-400 hover:scale-110 transition-transform"
-                  >
-                    <Star
-                      size={18}
-                      className={star <= rating ? "fill-amber-400 text-amber-400" : "text-slate-700"}
-                    />
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Rating</label>
+              <div className="flex items-center gap-1 bg-base-800 border border-base-700 rounded-lg px-3 py-2">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <button key={s} type="button" onClick={() => update("rating", s)} className="hover:scale-110 transition-transform">
+                    <Star size={16} className={s <= form.rating ? "fill-amber-400 text-amber-400" : "text-gray-700"} />
                   </button>
                 ))}
               </div>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Start Year</label>
-              <input 
-                type="number" 
-                value={startYear} 
-                onChange={(e) => setStartYear(e.target.value)}
-                className="input-glass"
-              />
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Year</label>
+              <input type="number" value={form.startYear} onChange={(e) => update("startYear", e.target.value)} className="input-dark" />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Start Month</label>
-              <select 
-                value={startMonth} 
-                onChange={(e) => setStartMonth(e.target.value)}
-                className="input-glass cursor-pointer"
-              >
-                {MONTHS.map((m) => (
-                  <option key={m} value={m} className="bg-space-900">{m}</option>
-                ))}
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Month</label>
+              <select value={form.startMonth} onChange={(e) => update("startMonth", e.target.value)} className="input-dark cursor-pointer">
+                {MONTHS.map((m) => <option key={m} value={m} className="bg-black">{m}</option>)}
               </select>
             </div>
           </div>
 
-          {/* Preset Gradients */}
+          {/* Cover Gradient */}
           <div>
-            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Shelf Card Background Style</label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-              {GRADIENT_PRESETS.map((preset) => (
-                <button
-                  key={preset.name}
-                  type="button"
-                  onClick={() => setCoverGradient(preset.value)}
-                  className={`h-11 rounded-lg bg-gradient-to-br ${preset.value} border-2 text-[10px] font-bold text-white shadow-inner flex items-center justify-center transition-all ${
-                    coverGradient === preset.value 
-                      ? "border-violet-400 scale-102 ring-2 ring-violet-500/20" 
-                      : "border-white/10 hover:border-white/30"
+            <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Card Color</label>
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+              {GRADIENT_PRESETS.map((p) => (
+                <button key={p.name} type="button" onClick={() => update("coverGradient", p.value)}
+                  className={`h-9 rounded-lg bg-gradient-to-br ${p.value} border-2 text-[9px] font-bold text-white/80 flex items-center justify-center transition-all ${
+                    form.coverGradient === p.value ? "border-blue-400 ring-1 ring-blue-500/30" : "border-transparent hover:border-gray-600"
                   }`}
                 >
-                  {preset.name}
+                  {p.name}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Personal Review */}
+          {/* Review */}
           <div>
-            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Personal Review</label>
-            <textarea 
-              value={review} 
-              onChange={(e) => setReview(e.target.value)}
-              placeholder="What were your thoughts on this book?"
-              rows={3}
-              className="input-glass resize-none"
-            />
+            <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Review</label>
+            <textarea value={form.review} onChange={(e) => update("review", e.target.value)}
+              placeholder="Your thoughts on this book..." rows={3} className="input-dark resize-none" />
           </div>
 
-          {/* Key Takeaway */}
+          {/* Takeaway */}
           <div>
-            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Key Takeaway / Lesson</label>
-            <textarea 
-              value={takeaway} 
-              onChange={(e) => setTakeaway(e.target.value)}
-              placeholder="What is the one lesson or model you learned from this?"
-              rows={2}
-              className="input-glass resize-none"
-            />
+            <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Key Takeaway</label>
+            <textarea value={form.takeaway} onChange={(e) => update("takeaway", e.target.value)}
+              placeholder="The one lesson you learned..." rows={2} className="input-dark resize-none" />
           </div>
 
-          {/* Memorable Quote */}
+          {/* Quote */}
           <div>
-            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Memorable Quote</label>
-            <textarea 
-              value={quote} 
-              onChange={(e) => setQuote(e.target.value)}
-              placeholder="A quote from the book that stuck with you..."
-              rows={2}
-              className="input-glass resize-none"
-            />
+            <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Memorable Quote</label>
+            <textarea value={form.quote} onChange={(e) => update("quote", e.target.value)}
+              placeholder="A quote that stuck with you..." rows={2} className="input-dark resize-none" />
           </div>
-
         </form>
 
-        {/* Footer Actions */}
-        <div className="flex items-center justify-end gap-3 p-6 border-t border-white/5 bg-space-950/40">
-          <button 
-            type="button" 
-            onClick={onClose} 
-            className="btn-ghost py-2 px-6"
-          >
-            Cancel
-          </button>
-          <button 
-            onClick={handleSubmit} 
-            disabled={!title.trim() || !author.trim()}
-            className="btn-primary py-2 px-6 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
+        {/* Actions */}
+        <div className="flex items-center justify-end gap-3 p-5 border-t border-base-700">
+          <button type="button" onClick={onClose} className="btn-ghost py-2 px-5 text-sm">Cancel</button>
+          <button onClick={handleSubmit} disabled={!form.title.trim() || !form.author.trim()}
+            className="btn-primary py-2 px-5 text-sm disabled:opacity-40 disabled:cursor-not-allowed">
             {bookToEdit ? "Save Changes" : "Add Book"}
           </button>
         </div>

@@ -109,10 +109,10 @@ export default function Home() {
   // Loading state
   if (!isLoaded) {
     return (
-      <main className="min-h-screen bg-space-950 flex items-center justify-center">
+      <main className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="w-10 h-10 border-4 border-violet-500 border-t-transparent rounded-full animate-spin mx-auto" />
-          <h2 className="text-sm font-semibold tracking-wide text-slate-400">Loading Shelf...</h2>
+          <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto" />
+          <h2 className="text-sm font-semibold tracking-wide text-gray-400">Loading Shelf...</h2>
         </div>
       </main>
     );
@@ -123,26 +123,20 @@ export default function Home() {
   const avgRating = books.length > 0 
     ? (books.reduce((acc, b) => acc + b.rating, 0) / books.length).toFixed(1) 
     : "0.0";
-  const currentReading = books.filter(b => b.status === "reading").length;
 
   return (
-    <main className="relative min-h-screen overflow-hidden">
+    <main className="relative min-h-screen bg-black">
       
-      {/* Ambient decorative glass orbs */}
-      <div className="orb orb-violet w-[500px] h-[500px] -top-32 -left-32 opacity-50" />
-      <div className="orb orb-cyan w-[400px] h-[400px] top-1/4 -right-20 opacity-30" />
-      <div className="orb orb-indigo w-[350px] h-[350px] bottom-10 left-1/3 opacity-25" />
-
       {/* Main page wrapper */}
       <div className="relative z-10 max-w-6xl mx-auto px-6 py-12">
         
         {/* Navigation Bar */}
         <nav className="flex items-center justify-between mb-16 animate-fade-in">
           <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setActiveView("shelf")}>
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg">
+            <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg">
               <BookOpen size={18} className="text-white" />
             </div>
-            <span className="text-slate-200 font-semibold text-base tracking-tight">
+            <span className="text-gray-200 font-semibold text-base tracking-tight">
               My<span className="gradient-text">Reading</span>List
             </span>
           </div>
@@ -151,7 +145,7 @@ export default function Home() {
             <button 
               onClick={() => setActiveView("shelf")}
               className={`btn-ghost text-xs py-2 px-4 flex items-center gap-1.5 ${
-                activeView === "shelf" ? "bg-white/10 text-white border-white/25" : ""
+                activeView === "shelf" ? "bg-base-800 text-white border-base-700" : ""
               }`}
             >
               <Library size={13} />
@@ -160,7 +154,7 @@ export default function Home() {
             <button 
               onClick={() => setActiveView("analytics")}
               className={`btn-ghost text-xs py-2 px-4 flex items-center gap-1.5 ${
-                activeView === "analytics" ? "bg-white/10 text-white border-white/25" : ""
+                activeView === "analytics" ? "bg-base-800 text-white border-base-700" : ""
               }`}
             >
               <BarChart3 size={13} />
@@ -171,18 +165,18 @@ export default function Home() {
 
         {/* Hero Section */}
         <section className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 glass px-4 py-1.5 rounded-full text-xs text-slate-400 mb-8 animate-slide-up">
-            <Sparkles size={12} className="text-violet-400" />
+          <div className="inline-flex items-center gap-2 surface px-4 py-1.5 rounded-full text-xs text-gray-400 mb-8 animate-slide-up">
+            <Sparkles size={12} className="text-blue-400" />
             <span>Interactive portfolio of books, reflections, and insights</span>
           </div>
 
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6 leading-tight animate-slide-up delay-100">
             Reading Shapes
             <br />
-            <span className="shimmer-text">Perspective</span>
+            <span className="gradient-text">Perspective</span>
           </h1>
 
-          <p className="text-slate-400 text-sm md:text-base max-w-2xl mx-auto leading-relaxed animate-slide-up delay-200">
+          <p className="text-gray-400 text-sm md:text-base max-w-2xl mx-auto leading-relaxed animate-slide-up delay-200">
             A curated log of my educational readings, reviews, and insights. Filter through categories, 
             explore rating trends, or check stats on genres and timeline logs below.
           </p>
@@ -190,18 +184,18 @@ export default function Home() {
 
         {/* Dynamic Quote Spotlight */}
         {spotlightBook && activeView === "shelf" && (
-          <section className="glass p-6 md:p-8 mb-16 max-w-3xl mx-auto relative overflow-hidden animate-slide-up delay-300">
-            <div className="absolute top-4 left-4 text-violet-500/10">
+          <section className="surface p-6 md:p-8 mb-16 max-w-3xl mx-auto relative overflow-hidden animate-slide-up delay-300">
+            <div className="absolute top-4 left-4 text-blue-500/10">
               <QuoteIcon size={80} />
             </div>
             <div className="relative z-10 text-center space-y-4">
-              <p className="text-slate-300 font-medium italic text-base leading-relaxed">
+              <p className="text-gray-300 font-medium italic text-base leading-relaxed">
                 "{spotlightBook.quote}"
               </p>
               <div className="flex items-center justify-center gap-2 text-xs">
-                <span className="text-violet-400 font-semibold">{spotlightBook.title}</span>
-                <span className="text-slate-600">—</span>
-                <span className="text-slate-500">{spotlightBook.author}</span>
+                <span className="text-blue-400 font-semibold">{spotlightBook.title}</span>
+                <span className="text-gray-600">—</span>
+                <span className="text-gray-500">{spotlightBook.author}</span>
               </div>
             </div>
           </section>
@@ -213,8 +207,8 @@ export default function Home() {
           <div className="space-y-6">
             <div className="flex items-center justify-between mb-2">
               <div>
-                <h2 className="text-xl font-bold text-slate-100">Visual Insights</h2>
-                <p className="text-xs text-slate-500 mt-0.5">Aggregate reading analytics graphs</p>
+                <h2 className="text-xl font-bold text-gray-100">Visual Insights</h2>
+                <p className="text-xs text-gray-500 mt-0.5">Aggregate reading analytics graphs</p>
               </div>
               <button 
                 onClick={() => setActiveView("shelf")}
@@ -231,63 +225,63 @@ export default function Home() {
             
             {/* Quick Stats Grid */}
             <div className="grid grid-cols-3 gap-4 mb-8">
-              <div className="glass p-4 text-center">
-                <div className="text-xl md:text-2xl font-bold text-slate-200">{books.length}</div>
-                <div className="text-[10px] text-slate-500 uppercase tracking-wider mt-0.5">Shelf Items</div>
+              <div className="surface p-4 text-center">
+                <div className="text-xl md:text-2xl font-bold text-gray-200">{books.length}</div>
+                <div className="text-[10px] text-gray-500 uppercase tracking-wider mt-0.5">Shelf Items</div>
               </div>
-              <div className="glass p-4 text-center">
-                <div className="text-xl md:text-2xl font-bold text-violet-400">{totalRead}</div>
-                <div className="text-[10px] text-slate-500 uppercase tracking-wider mt-0.5">Completed</div>
+              <div className="surface p-4 text-center">
+                <div className="text-xl md:text-2xl font-bold text-blue-400">{totalRead}</div>
+                <div className="text-[10px] text-gray-500 uppercase tracking-wider mt-0.5">Completed</div>
               </div>
-              <div className="glass p-4 text-center">
-                <div className="text-xl md:text-2xl font-bold text-cyan-400">{avgRating}★</div>
-                <div className="text-[10px] text-slate-500 uppercase tracking-wider mt-0.5">Avg Rating</div>
+              <div className="surface p-4 text-center">
+                <div className="text-xl md:text-2xl font-bold text-amber-400">{avgRating}★</div>
+                <div className="text-[10px] text-gray-500 uppercase tracking-wider mt-0.5">Avg Rating</div>
               </div>
             </div>
 
             {/* Filter and Control Bar */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-4 border-b border-t border-white/5 bg-space-950/20 backdrop-blur-sm z-20 sticky top-0">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-4 border-b border-t border-base-800 bg-black/90 backdrop-blur-md z-20 sticky top-0">
               
               {/* Left Side: Search & Filter dropdowns */}
               <div className="flex flex-wrap items-center gap-3 flex-1">
                 {/* Search Box */}
                 <div className="relative flex-1 min-w-[200px] max-w-md">
-                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search title, author..."
-                    className="input-glass pl-9 text-xs py-2"
+                    className="input-dark pl-9 text-xs py-2"
                   />
                 </div>
 
                 {/* Genre Select */}
                 <div className="flex items-center gap-1.5">
-                  <Filter size={12} className="text-slate-500" />
+                  <Filter size={12} className="text-gray-500" />
                   <select
                     value={selectedGenre}
                     onChange={(e) => setSelectedGenre(e.target.value)}
-                    className="input-glass py-2 px-3 text-xs w-36 cursor-pointer"
+                    className="input-dark py-2 px-3 text-xs w-36 cursor-pointer"
                   >
                     {availableGenres.map((g) => (
-                      <option key={g} value={g} className="bg-space-900">{g}</option>
+                      <option key={g} value={g} className="bg-black">{g}</option>
                     ))}
                   </select>
                 </div>
 
                 {/* Status Select */}
                 <div className="flex items-center gap-1.5">
-                  <BookMarked size={12} className="text-slate-500" />
+                  <BookMarked size={12} className="text-gray-500" />
                   <select
                     value={selectedStatus}
                     onChange={(e) => setSelectedStatus(e.target.value)}
-                    className="input-glass py-2 px-3 text-xs w-36 cursor-pointer"
+                    className="input-dark py-2 px-3 text-xs w-36 cursor-pointer"
                   >
-                    <option value="All" className="bg-space-900">All Status</option>
-                    <option value="completed" className="bg-space-900">Completed</option>
-                    <option value="reading" className="bg-space-900">Reading</option>
-                    <option value="to-read" className="bg-space-900">To Read</option>
+                    <option value="All" className="bg-black">All Status</option>
+                    <option value="completed" className="bg-black">Completed</option>
+                    <option value="reading" className="bg-black">Reading</option>
+                    <option value="to-read" className="bg-black">To Read</option>
                   </select>
                 </div>
               </div>
@@ -296,7 +290,7 @@ export default function Home() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleResetDefaults}
-                  className="btn-ghost p-2 rounded-full border border-white/10 hover:bg-white/5"
+                  className="p-2 rounded-full border border-base-700 hover:border-gray-500 hover:bg-base-800 text-gray-400 hover:text-white transition-colors"
                   title="Reset list to sample defaults"
                 >
                   <RotateCcw size={14} />
@@ -337,13 +331,13 @@ export default function Home() {
               </div>
             ) : (
               /* Empty Search Results / Collection state */
-              <div className="glass p-12 text-center max-w-md mx-auto space-y-4">
-                <div className="w-12 h-12 rounded-2xl bg-slate-900 flex items-center justify-center text-slate-500 mx-auto">
+              <div className="surface p-12 text-center max-w-md mx-auto space-y-4">
+                <div className="w-12 h-12 rounded-2xl bg-neutral-900 flex items-center justify-center text-gray-500 mx-auto">
                   <BookOpen size={24} />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-slate-300">No books found</h3>
-                  <p className="text-xs text-slate-500 mt-1">
+                  <h3 className="text-sm font-semibold text-gray-300">No books found</h3>
+                  <p className="text-xs text-gray-500 mt-1">
                     Try adjusting your search queries, clearing your filters, or adding a new book to the shelf.
                   </p>
                 </div>
@@ -366,9 +360,9 @@ export default function Home() {
         )}
 
         {/* Footer */}
-        <footer className="mt-24 border-t border-white/5 pt-6 pb-4 flex flex-col sm:flex-row items-center justify-between text-[10px] text-slate-600 gap-4">
+        <footer className="mt-24 border-t border-base-800 pt-6 pb-4 flex flex-col sm:flex-row items-center justify-between text-[10px] text-gray-600 gap-4">
           <div>
-            Built with Next.js App Router · Tailwind CSS v4 · Glassmorphic Theme
+            Built with Next.js App Router · Tailwind CSS v4 · Minimal Dark Theme
           </div>
           <div>
             &copy; {new Date().getFullYear()} My Reading List Portfolio. All rights reserved.
