@@ -1,117 +1,144 @@
 "use client";
-
-import { BookOpen, Sparkles, BarChart3, Star, BookMarked, Brain, Cpu, Leaf } from "lucide-react";
-
-const stats = [
-  { label: "Books Read", value: "24+", icon: BookOpen, color: "text-violet-400" },
-  { label: "Genres", value: "8", icon: BookMarked, color: "text-cyan-400" },
-  { label: "Avg Rating", value: "4.3★", icon: Star, color: "text-amber-400" },
-  { label: "Currently Reading", value: "2", icon: Brain, color: "text-rose-400" },
-];
-
-const previewBooks = [
-  {
-    title: "Designing Data-Intensive Applications",
-    author: "Martin Kleppmann",
-    genre: "Technology",
-    status: "completed",
-    rating: 5,
-    color: "from-violet-600/20 to-indigo-600/20",
-    border: "border-violet-500/20",
-    icon: Cpu,
-  },
-  {
-    title: "Atomic Habits",
-    author: "James Clear",
-    genre: "Self-Growth",
-    status: "completed",
-    rating: 5,
-    color: "from-cyan-600/20 to-blue-600/20",
-    border: "border-cyan-500/20",
-    icon: Leaf,
-  },
-  {
-    title: "Thinking, Fast and Slow",
-    author: "Daniel Kahneman",
-    genre: "Psychology",
-    status: "reading",
-    rating: 4,
-    color: "from-rose-600/20 to-orange-600/20",
-    border: "border-rose-500/20",
-    icon: Brain,
-  },
-];
-
-function StarRating({ rating, max = 5 }) {
-  return (
-    <div className="flex gap-0.5">
-      {Array.from({ length: max }).map((_, i) => (
-        <Star
-          key={i}
-          size={12}
-          className={i < rating ? "star-filled fill-amber-400" : "star-empty fill-slate-700 text-slate-700"}
-        />
-      ))}
-    </div>
-  );
-}
-
-function StatusBadge({ status }) {
-  const map = {
-    reading: { label: "Reading", cls: "badge badge-reading" },
-    completed: { label: "Completed", cls: "badge badge-completed" },
-    "to-read": { label: "To Read", cls: "badge badge-to-read" },
-  };
-  const b = map[status] || map["to-read"];
-  return <span className={b.cls}>{b.label}</span>;
-}
-
-function BookCard({ book, delay }) {
-  const Icon = book.icon;
-  return (
-    <div
-      className={`glass-card p-5 flex flex-col gap-3 animate-slide-up delay-${delay}`}
-      style={{ animationDelay: `${delay * 0.1}s` }}
-    >
-      <div className={`w-full h-28 rounded-lg bg-gradient-to-br ${book.color} border ${book.border} flex items-center justify-center`}>
-        <Icon size={40} className="text-white/30" />
-      </div>
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-semibold text-slate-200 leading-snug line-clamp-2">
-            {book.title}
-          </h3>
-          <p className="text-xs text-slate-500 mt-0.5">{book.author}</p>
-        </div>
-      </div>
-      <div className="flex items-center justify-between">
-        <StatusBadge status={book.status} />
-        <StarRating rating={book.rating} />
-      </div>
-      <div>
-        <span className="text-xs text-slate-500 bg-slate-800/60 px-2 py-0.5 rounded-full">
-          {book.genre}
-        </span>
-      </div>
-    </div>
-  );
-}
+import { useState, useEffect } from "react";
+import { 
+  BookOpen, Sparkles, BarChart3, Star, BookMarked, 
+  Search, Plus, Filter, RotateCcw, Quote as QuoteIcon, Library
+} from "lucide-react";
+import { defaultBooks } from "@/data/defaultBooks";
+import BookCard from "@/components/BookCard";
+import BookModal from "@/components/BookModal";
+import BookDetailsModal from "@/components/BookDetailsModal";
+import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 
 export default function Home() {
+  const [books, setBooks] = useState([]);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [activeView, setActiveView] = useState("shelf"); // "shelf" or "analytics"
+
+  // Filter States
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedGenre, setSelectedGenre] = useState("All");
+  const [selectedStatus, setSelectedStatus] = useState("All");
+
+  // Modal States
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [selectedBook, setSelectedBook] = useState(null);
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [bookToEdit, setBookToEdit] = useState(null);
+
+  // Quote Spotlight State
+  const [spotlightBook, setSpotlightBook] = useState(null);
+
+  // 1. Initial State Load from LocalStorage
+  useEffect(() => {
+    const localData = localStorage.getItem("my_reading_list_books");
+    if (localData) {
+      try {
+        setBooks(JSON.parse(localData));
+      } catch (e) {
+        setBooks(defaultBooks);
+        localStorage.setItem("my_reading_list_books", JSON.stringify(defaultBooks));
+      }
+    } else {
+      setBooks(defaultBooks);
+      localStorage.setItem("my_reading_list_books", JSON.stringify(defaultBooks));
+    }
+    setIsLoaded(true);
+  }, []);
+
+  // 2. Select Spotlight Quote dynamically when books load/change
+  useEffect(() => {
+    if (books.length > 0) {
+      const booksWithQuotes = books.filter(b => b.quote && b.quote.trim().length > 0);
+      if (booksWithQuotes.length > 0) {
+        const randomIndex = Math.floor(Math.random() * booksWithQuotes.length);
+        setSpotlightBook(booksWithQuotes[randomIndex]);
+      } else {
+        setSpotlightBook(null);
+      }
+    } else {
+      setSpotlightBook(null);
+    }
+  }, [books]);
+
+  // 3. Actions
+  const handleSaveBook = (savedBook) => {
+    let updatedBooks;
+    if (bookToEdit) {
+      // Edit mode
+      updatedBooks = books.map((b) => (b.id === savedBook.id ? savedBook : b));
+    } else {
+      // Add mode
+      updatedBooks = [savedBook, ...books];
+    }
+    setBooks(updatedBooks);
+    localStorage.setItem("my_reading_list_books", JSON.stringify(updatedBooks));
+    setBookToEdit(null);
+  };
+
+  const handleDeleteBook = (id) => {
+    const updatedBooks = books.filter((b) => b.id !== id);
+    setBooks(updatedBooks);
+    localStorage.setItem("my_reading_list_books", JSON.stringify(updatedBooks));
+  };
+
+  const handleResetDefaults = () => {
+    if (confirm("This will reset all your changes and restore the default reading list. Proceed?")) {
+      setBooks(defaultBooks);
+      localStorage.setItem("my_reading_list_books", JSON.stringify(defaultBooks));
+      setSearchQuery("");
+      setSelectedGenre("All");
+      setSelectedStatus("All");
+    }
+  };
+
+  // Get unique genres dynamically from book list
+  const availableGenres = ["All", ...new Set(books.map((b) => b.genre))];
+
+  // Filter books based on search & selectors
+  const filteredBooks = books.filter((book) => {
+    const matchesSearch = 
+      book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      book.author.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesGenre = selectedGenre === "All" || book.genre === selectedGenre;
+    const matchesStatus = selectedStatus === "All" || book.status === selectedStatus;
+    return matchesSearch && matchesGenre && matchesStatus;
+  });
+
+  // Loading state
+  if (!isLoaded) {
+    return (
+      <main className="min-h-screen bg-space-950 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-10 h-10 border-4 border-violet-500 border-t-transparent rounded-full animate-spin mx-auto" />
+          <h2 className="text-sm font-semibold tracking-wide text-slate-400">Loading Shelf...</h2>
+        </div>
+      </main>
+    );
+  }
+
+  // Quick stats calculation
+  const totalRead = books.filter(b => b.status === "completed").length;
+  const avgRating = books.length > 0 
+    ? (books.reduce((acc, b) => acc + b.rating, 0) / books.length).toFixed(1) 
+    : "0.0";
+  const currentReading = books.filter(b => b.status === "reading").length;
+
   return (
     <main className="relative min-h-screen overflow-hidden">
+      
+      {/* Ambient decorative glass orbs */}
+      <div className="orb orb-violet w-[500px] h-[500px] -top-32 -left-32 opacity-50" />
+      <div className="orb orb-cyan w-[400px] h-[400px] top-1/4 -right-20 opacity-30" />
+      <div className="orb orb-indigo w-[350px] h-[350px] bottom-10 left-1/3 opacity-25" />
 
-      {/* ── Ambient Orbs ── */}
-      <div className="orb orb-violet w-[600px] h-[600px] -top-40 -left-40 opacity-60" />
-      <div className="orb orb-cyan   w-[400px] h-[400px] top-1/3 -right-20 opacity-40" />
-      <div className="orb orb-indigo w-[350px] h-[350px] bottom-0 left-1/3 opacity-30" />
-
-      {/* ── Content Wrapper ── */}
+      {/* Main page wrapper */}
       <div className="relative z-10 max-w-6xl mx-auto px-6 py-12">
-
-        {/* ── Navbar ── */}
-        <nav className="flex items-center justify-between mb-20 animate-fade-in">
-          <div className="flex items-center gap-2.5">
+        
+        {/* Navigation Bar */}
+        <nav className="flex items-center justify-between mb-16 animate-fade-in">
+          <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setActiveView("shelf")}>
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg">
               <BookOpen size={18} className="text-white" />
             </div>
@@ -119,100 +146,263 @@ export default function Home() {
               My<span className="gradient-text">Reading</span>List
             </span>
           </div>
+
           <div className="flex items-center gap-3">
-            <button className="btn-ghost text-sm py-2 px-4">All Books</button>
-            <button className="btn-primary text-sm py-2 px-4">
-              <Sparkles size={14} />
-              Analytics
+            <button 
+              onClick={() => setActiveView("shelf")}
+              className={`btn-ghost text-xs py-2 px-4 flex items-center gap-1.5 ${
+                activeView === "shelf" ? "bg-white/10 text-white border-white/25" : ""
+              }`}
+            >
+              <Library size={13} />
+              Book Collection
+            </button>
+            <button 
+              onClick={() => setActiveView("analytics")}
+              className={`btn-ghost text-xs py-2 px-4 flex items-center gap-1.5 ${
+                activeView === "analytics" ? "bg-white/10 text-white border-white/25" : ""
+              }`}
+            >
+              <BarChart3 size={13} />
+              Analytics Dashboard
             </button>
           </div>
         </nav>
 
-        {/* ── Hero Section ── */}
-        <section className="text-center mb-20">
+        {/* Hero Section */}
+        <section className="text-center mb-16">
           <div className="inline-flex items-center gap-2 glass px-4 py-1.5 rounded-full text-xs text-slate-400 mb-8 animate-slide-up">
             <Sparkles size={12} className="text-violet-400" />
-            <span>A curated reading journey — books, reviews & insights</span>
+            <span>Interactive portfolio of books, reflections, and insights</span>
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 leading-tight animate-slide-up delay-100">
-            Every Book
+          <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6 leading-tight animate-slide-up delay-100">
+            Reading Shapes
             <br />
-            <span className="shimmer-text">Tells a Story</span>
+            <span className="shimmer-text">Perspective</span>
           </h1>
 
-          <p className="text-slate-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed mb-10 animate-slide-up delay-200">
-            From <span className="text-violet-400 font-medium">data systems</span> to{" "}
-            <span className="text-cyan-400 font-medium">human psychology</span> — my curated
-            collection of books that shaped the way I think, build, and grow.
+          <p className="text-slate-400 text-sm md:text-base max-w-2xl mx-auto leading-relaxed animate-slide-up delay-200">
+            A curated log of my educational readings, reviews, and insights. Filter through categories, 
+            explore rating trends, or check stats on genres and timeline logs below.
           </p>
-
-          <div className="flex items-center justify-center gap-4 animate-slide-up delay-300">
-            <button id="explore-btn" className="btn-primary px-8 py-3 text-base">
-              <BookOpen size={16} />
-              Explore Collection
-            </button>
-            <button id="analytics-btn" className="btn-ghost px-8 py-3 text-base">
-              <BarChart3 size={16} />
-              View Analytics
-            </button>
-          </div>
         </section>
 
-        {/* ── Stats Bar ── */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-20 animate-slide-up delay-400">
-          {stats.map((stat) => {
-            const Icon = stat.icon;
-            return (
-              <div key={stat.label} className="glass glass-hover p-5 text-center cursor-default">
-                <Icon size={20} className={`${stat.color} mx-auto mb-2`} />
-                <div className="text-2xl font-bold text-slate-100">{stat.value}</div>
-                <div className="text-xs text-slate-500 mt-0.5">{stat.label}</div>
-              </div>
-            );
-          })}
-        </section>
-
-        <div className="divider" />
-
-        {/* ── Book Preview Grid ── */}
-        <section className="mb-20">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-2xl font-bold text-slate-100">
-                Featured <span className="gradient-text">Books</span>
-              </h2>
-              <p className="text-slate-500 text-sm mt-1">A preview of my reading shelf</p>
+        {/* Dynamic Quote Spotlight */}
+        {spotlightBook && activeView === "shelf" && (
+          <section className="glass p-6 md:p-8 mb-16 max-w-3xl mx-auto relative overflow-hidden animate-slide-up delay-300">
+            <div className="absolute top-4 left-4 text-violet-500/10">
+              <QuoteIcon size={80} />
             </div>
-            <button className="btn-ghost py-2 px-4 text-sm">View All →</button>
+            <div className="relative z-10 text-center space-y-4">
+              <p className="text-slate-300 font-medium italic text-base leading-relaxed">
+                "{spotlightBook.quote}"
+              </p>
+              <div className="flex items-center justify-center gap-2 text-xs">
+                <span className="text-violet-400 font-semibold">{spotlightBook.title}</span>
+                <span className="text-slate-600">—</span>
+                <span className="text-slate-500">{spotlightBook.author}</span>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Main Content Area */}
+        {activeView === "analytics" ? (
+          /* Render Analytics Dashboard view */
+          <div className="space-y-6">
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <h2 className="text-xl font-bold text-slate-100">Visual Insights</h2>
+                <p className="text-xs text-slate-500 mt-0.5">Aggregate reading analytics graphs</p>
+              </div>
+              <button 
+                onClick={() => setActiveView("shelf")}
+                className="btn-ghost py-1.5 px-4 text-xs"
+              >
+                ← Back to Books
+              </button>
+            </div>
+            <AnalyticsDashboard books={books} />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-            {previewBooks.map((book, i) => (
-              <BookCard key={book.title} book={book} delay={(i + 3) * 100} />
-            ))}
+        ) : (
+          /* Render Book Shelf view */
+          <div className="space-y-8 animate-fade-in">
+            
+            {/* Quick Stats Grid */}
+            <div className="grid grid-cols-3 gap-4 mb-8">
+              <div className="glass p-4 text-center">
+                <div className="text-xl md:text-2xl font-bold text-slate-200">{books.length}</div>
+                <div className="text-[10px] text-slate-500 uppercase tracking-wider mt-0.5">Shelf Items</div>
+              </div>
+              <div className="glass p-4 text-center">
+                <div className="text-xl md:text-2xl font-bold text-violet-400">{totalRead}</div>
+                <div className="text-[10px] text-slate-500 uppercase tracking-wider mt-0.5">Completed</div>
+              </div>
+              <div className="glass p-4 text-center">
+                <div className="text-xl md:text-2xl font-bold text-cyan-400">{avgRating}★</div>
+                <div className="text-[10px] text-slate-500 uppercase tracking-wider mt-0.5">Avg Rating</div>
+              </div>
+            </div>
+
+            {/* Filter and Control Bar */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-4 border-b border-t border-white/5 bg-space-950/20 backdrop-blur-sm z-20 sticky top-0">
+              
+              {/* Left Side: Search & Filter dropdowns */}
+              <div className="flex flex-wrap items-center gap-3 flex-1">
+                {/* Search Box */}
+                <div className="relative flex-1 min-w-[200px] max-w-md">
+                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search title, author..."
+                    className="input-glass pl-9 text-xs py-2"
+                  />
+                </div>
+
+                {/* Genre Select */}
+                <div className="flex items-center gap-1.5">
+                  <Filter size={12} className="text-slate-500" />
+                  <select
+                    value={selectedGenre}
+                    onChange={(e) => setSelectedGenre(e.target.value)}
+                    className="input-glass py-2 px-3 text-xs w-36 cursor-pointer"
+                  >
+                    {availableGenres.map((g) => (
+                      <option key={g} value={g} className="bg-space-900">{g}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Status Select */}
+                <div className="flex items-center gap-1.5">
+                  <BookMarked size={12} className="text-slate-500" />
+                  <select
+                    value={selectedStatus}
+                    onChange={(e) => setSelectedStatus(e.target.value)}
+                    className="input-glass py-2 px-3 text-xs w-36 cursor-pointer"
+                  >
+                    <option value="All" className="bg-space-900">All Status</option>
+                    <option value="completed" className="bg-space-900">Completed</option>
+                    <option value="reading" className="bg-space-900">Reading</option>
+                    <option value="to-read" className="bg-space-900">To Read</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Right Side: Add Button & Reset */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleResetDefaults}
+                  className="btn-ghost p-2 rounded-full border border-white/10 hover:bg-white/5"
+                  title="Reset list to sample defaults"
+                >
+                  <RotateCcw size={14} />
+                </button>
+                <button
+                  onClick={() => {
+                    setBookToEdit(null);
+                    setIsModalOpen(true);
+                  }}
+                  className="btn-primary py-2 px-5 text-xs flex items-center gap-1.5"
+                >
+                  <Plus size={14} />
+                  Add Book
+                </button>
+              </div>
+
+            </div>
+
+            {/* Books Grid */}
+            {filteredBooks.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                {filteredBooks.map((book, index) => (
+                  <BookCard
+                    key={book.id}
+                    book={book}
+                    delay={index}
+                    onOpenDetails={(b) => {
+                      setSelectedBook(b);
+                      setIsDetailsOpen(true);
+                    }}
+                    onOpenEdit={(b) => {
+                      setBookToEdit(b);
+                      setIsModalOpen(true);
+                    }}
+                    onDelete={handleDeleteBook}
+                  />
+                ))}
+              </div>
+            ) : (
+              /* Empty Search Results / Collection state */
+              <div className="glass p-12 text-center max-w-md mx-auto space-y-4">
+                <div className="w-12 h-12 rounded-2xl bg-slate-900 flex items-center justify-center text-slate-500 mx-auto">
+                  <BookOpen size={24} />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-300">No books found</h3>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Try adjusting your search queries, clearing your filters, or adding a new book to the shelf.
+                  </p>
+                </div>
+                {(searchQuery || selectedGenre !== "All" || selectedStatus !== "All") && (
+                  <button
+                    onClick={() => {
+                      setSearchQuery("");
+                      setSelectedGenre("All");
+                      setSelectedStatus("All");
+                    }}
+                    className="btn-ghost py-1.5 px-4 text-xs"
+                  >
+                    Clear Filters
+                  </button>
+                )}
+              </div>
+            )}
+
           </div>
-        </section>
+        )}
 
-        <div className="divider" />
-
-        {/* ── Analytics Teaser ── */}
-        <section className="glass p-8 text-center animate-pulse-glow mb-12">
-          <BarChart3 size={32} className="text-violet-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-slate-100 mb-2">
-            Interactive <span className="gradient-text">Analytics Dashboard</span>
-          </h2>
-          <p className="text-slate-400 text-sm max-w-md mx-auto">
-            Explore genre distributions, reading timelines, and rating breakdowns with
-            beautiful interactive charts — coming soon as part of the full app.
-          </p>
-        </section>
-
-        {/* ── Footer ── */}
-        <footer className="text-center text-slate-600 text-xs pt-4 pb-6">
-          Built with Next.js · Tailwind CSS v4 · Glassmorphic Dark UI
+        {/* Footer */}
+        <footer className="mt-24 border-t border-white/5 pt-6 pb-4 flex flex-col sm:flex-row items-center justify-between text-[10px] text-slate-600 gap-4">
+          <div>
+            Built with Next.js App Router · Tailwind CSS v4 · Glassmorphic Theme
+          </div>
+          <div>
+            &copy; {new Date().getFullYear()} My Reading List Portfolio. All rights reserved.
+          </div>
         </footer>
 
       </div>
+
+      {/* Add / Edit Form Modal */}
+      <BookModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setBookToEdit(null);
+        }}
+        onSave={handleSaveBook}
+        bookToEdit={bookToEdit}
+      />
+
+      {/* Details Showcase Modal */}
+      <BookDetailsModal
+        isOpen={isDetailsOpen}
+        onClose={() => {
+          setIsDetailsOpen(false);
+          setSelectedBook(null);
+        }}
+        book={selectedBook}
+        onOpenEdit={(b) => {
+          setBookToEdit(b);
+          setIsModalOpen(true);
+        }}
+        onDelete={handleDeleteBook}
+      />
+
     </main>
   );
 }
