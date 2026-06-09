@@ -145,7 +145,7 @@ export default function Home() {
       <div className="relative z-10 max-w-6xl mx-auto px-6 py-12">
         
         {/* Navigation Bar */}
-        <nav className="flex items-center justify-between mb-16">
+        <nav className="flex flex-col sm:flex-row items-center justify-between gap-6 mb-16">
           <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setActiveView("shelf")}>
             <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg">
               <BookOpen size={18} className="text-white" />
@@ -155,10 +155,10 @@ export default function Home() {
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 w-full sm:w-auto justify-center sm:justify-end">
             <button 
               onClick={() => setActiveView("shelf")}
-              className={`btn-ghost text-xs py-2 px-4 flex items-center gap-1.5 ${
+              className={`btn-ghost text-xs py-2 px-4 flex items-center gap-1.5 flex-1 sm:flex-initial justify-center ${
                 activeView === "shelf" ? "bg-base-800 text-white border-base-700" : ""
               }`}
             >
@@ -167,7 +167,7 @@ export default function Home() {
             </button>
             <button 
               onClick={() => setActiveView("analytics")}
-              className={`btn-ghost text-xs py-2 px-4 flex items-center gap-1.5 ${
+              className={`btn-ghost text-xs py-2 px-4 flex items-center gap-1.5 flex-1 sm:flex-initial justify-center ${
                 activeView === "analytics" ? "bg-base-800 text-white border-base-700" : ""
               }`}
             >
@@ -238,70 +238,72 @@ export default function Home() {
           <div className="space-y-8">
             
             {/* Quick Stats Grid */}
-            <div className="grid grid-cols-3 gap-4 mb-8">
-              <div className="surface p-4 text-center">
-                <div className="text-xl md:text-2xl font-bold text-gray-200">{books.length}</div>
-                <div className="text-[10px] text-gray-500 uppercase tracking-wider mt-0.5">Shelf Items</div>
+            <div className="grid grid-cols-3 gap-3 md:gap-4 mb-8">
+              <div className="surface p-3 md:p-4 text-center">
+                <div className="text-lg md:text-2xl font-bold text-gray-200">{books.length}</div>
+                <div className="text-[9px] md:text-[10px] text-gray-500 uppercase tracking-wider mt-0.5 font-semibold">Shelf Items</div>
               </div>
-              <div className="surface p-4 text-center">
-                <div className="text-xl md:text-2xl font-bold text-blue-400">{totalRead}</div>
-                <div className="text-[10px] text-gray-500 uppercase tracking-wider mt-0.5">Completed</div>
+              <div className="surface p-3 md:p-4 text-center">
+                <div className="text-lg md:text-2xl font-bold text-blue-400">{totalRead}</div>
+                <div className="text-[9px] md:text-[10px] text-gray-500 uppercase tracking-wider mt-0.5 font-semibold">Completed</div>
               </div>
-              <div className="surface p-4 text-center">
-                <div className="text-xl md:text-2xl font-bold text-amber-400">{avgRating}★</div>
-                <div className="text-[10px] text-gray-500 uppercase tracking-wider mt-0.5">Avg Rating</div>
+              <div className="surface p-3 md:p-4 text-center">
+                <div className="text-lg md:text-2xl font-bold text-amber-400">{avgRating}★</div>
+                <div className="text-[9px] md:text-[10px] text-gray-500 uppercase tracking-wider mt-0.5 font-semibold">Avg Rating</div>
               </div>
             </div>
 
             {/* Filter and Control Bar */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-4 border-b border-t border-base-800 bg-black/90 backdrop-blur-md z-20 sticky top-0">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-4 border-b border-t border-base-800 bg-black/90 backdrop-blur-md z-20 md:sticky md:top-0">
               
               {/* Left Side: Search & Filter dropdowns */}
-              <div className="flex flex-wrap items-center gap-3 flex-1">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1 w-full">
                 {/* Search Box */}
-                <div className="relative flex-1 min-w-[200px] max-w-md">
+                <div className="relative flex-1 min-w-0 sm:max-w-xs">
                   <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search title, author..."
-                    className="input-dark pl-9 text-xs py-2"
+                    className="input-dark pl-9 text-xs py-2 w-full"
                   />
                 </div>
 
-                {/* Genre Select */}
-                <div className="flex items-center gap-1.5">
-                  <Filter size={12} className="text-gray-500" />
-                  <select
-                    value={selectedGenre}
-                    onChange={(e) => setSelectedGenre(e.target.value)}
-                    className="input-dark py-2 px-3 text-xs w-36 cursor-pointer"
-                  >
-                    {availableGenres.map((g) => (
-                      <option key={g} value={g} className="bg-black">{g}</option>
-                    ))}
-                  </select>
-                </div>
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  {/* Genre Select */}
+                  <div className="flex items-center gap-1.5 flex-1 sm:flex-initial">
+                    <Filter size={12} className="text-gray-500 shrink-0" />
+                    <select
+                      value={selectedGenre}
+                      onChange={(e) => setSelectedGenre(e.target.value)}
+                      className="input-dark py-2 px-3 text-xs w-full sm:w-32 cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap"
+                    >
+                      {availableGenres.map((g) => (
+                        <option key={g} value={g} className="bg-black">{g}</option>
+                      ))}
+                    </select>
+                  </div>
 
-                {/* Status Select */}
-                <div className="flex items-center gap-1.5">
-                  <BookMarked size={12} className="text-gray-500" />
-                  <select
-                    value={selectedStatus}
-                    onChange={(e) => setSelectedStatus(e.target.value)}
-                    className="input-dark py-2 px-3 text-xs w-36 cursor-pointer"
-                  >
-                    <option value="All" className="bg-black">All Status</option>
-                    <option value="completed" className="bg-black">Completed</option>
-                    <option value="reading" className="bg-black">Reading</option>
-                    <option value="to-read" className="bg-black">To Read</option>
-                  </select>
+                  {/* Status Select */}
+                  <div className="flex items-center gap-1.5 flex-1 sm:flex-initial">
+                    <BookMarked size={12} className="text-gray-500 shrink-0" />
+                    <select
+                      value={selectedStatus}
+                      onChange={(e) => setSelectedStatus(e.target.value)}
+                      className="input-dark py-2 px-3 text-xs w-full sm:w-32 cursor-pointer"
+                    >
+                      <option value="All" className="bg-black">All Status</option>
+                      <option value="completed" className="bg-black">Completed</option>
+                      <option value="reading" className="bg-black">Reading</option>
+                      <option value="to-read" className="bg-black">To Read</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 
               {/* Right Side: Add Button & Reset */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 w-full md:w-auto justify-end">
                 <button
                   onClick={handleResetDefaults}
                   className="p-2 rounded-full border border-base-700 hover:border-gray-500 hover:bg-base-800 text-gray-400 hover:text-white transition-colors"
@@ -314,7 +316,7 @@ export default function Home() {
                     setBookToEdit(null);
                     setIsModalOpen(true);
                   }}
-                  className="btn-primary py-2 px-5 text-xs flex items-center gap-1.5"
+                  className="btn-primary py-2 px-5 text-xs flex items-center gap-1.5 flex-1 sm:flex-initial justify-center"
                 >
                   <Plus size={14} />
                   Add Book

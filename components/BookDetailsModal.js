@@ -19,7 +19,7 @@ export default function BookDetailsModal({ isOpen, onClose, book, onOpenEdit, on
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header Cover */}
-        <div className={`w-full h-40 bg-gradient-to-br ${book.coverGradient || "from-gray-700 to-gray-800"} p-5 flex flex-col justify-between relative`}>
+        <div className={`w-full h-32 sm:h-40 bg-gradient-to-br ${book.coverGradient || "from-gray-700 to-gray-800"} p-5 flex flex-col justify-between relative`}>
           <div className="absolute inset-0 bg-black/25" />
 
           <div className="z-10 flex items-center justify-between w-full">
@@ -65,7 +65,7 @@ export default function BookDetailsModal({ isOpen, onClose, book, onOpenEdit, on
           {/* Quote */}
           {book.quote && (
             <div className="relative p-4 rounded-lg bg-base-800 border border-base-700">
-              <Quote size={28} className="absolute top-2 left-2 text-gray-800 rotate-180" />
+              <Quote size={28} className="absolute top-2 left-2 text-gray-800/10 rotate-180" />
               <p className="relative z-10 italic text-gray-300 text-sm leading-relaxed pl-5">
                 &ldquo;{book.quote}&rdquo;
               </p>
@@ -96,22 +96,22 @@ export default function BookDetailsModal({ isOpen, onClose, book, onOpenEdit, on
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between p-5 border-t border-base-700">
-          <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-5 border-t border-base-700 bg-base-900">
+          <div className="flex gap-2 flex-1 sm:flex-initial">
             <button
               onClick={() => { onOpenEdit(book); onClose(); }}
-              className="btn-ghost py-1.5 px-3 text-xs flex items-center gap-1.5"
+              className="btn-ghost py-1.5 px-3 text-xs flex items-center gap-1.5 flex-1 sm:flex-initial justify-center"
             >
               <Edit3 size={11} /> Edit
             </button>
             <button
               onClick={() => { if (confirm("Delete this book?")) { onDelete(book.id); onClose(); } }}
-              className="btn-ghost border-red-900/40 text-red-400 hover:bg-red-950/30 hover:border-red-800/60 py-1.5 px-3 text-xs flex items-center gap-1.5"
+              className="btn-ghost border-red-900/40 text-red-400 hover:bg-red-950/30 hover:border-red-800/60 py-1.5 px-3 text-xs flex items-center gap-1.5 flex-1 sm:flex-initial justify-center"
             >
               <Trash2 size={11} /> Delete
             </button>
           </div>
-          <button onClick={onClose} className="btn-primary py-1.5 px-5 text-xs">Close</button>
+          <button onClick={onClose} className="btn-primary py-1.5 px-5 text-xs justify-center">Close</button>
         </div>
       </div>
     </div>
