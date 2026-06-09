@@ -142,10 +142,10 @@ export default function Home() {
     <main className="relative min-h-screen bg-black">
       
       {/* Main page wrapper */}
-      <div className="relative z-10 max-w-6xl mx-auto px-6 py-12">
+      <div className="relative z-10 max-w-[1400px] mx-auto px-6 py-12">
         
         {/* Navigation Bar */}
-        <nav className="flex flex-col sm:flex-row items-center justify-between gap-6 mb-16">
+        <nav className="flex flex-col sm:flex-row items-center justify-between gap-6 mb-20">
           <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setActiveView("shelf")}>
             <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg">
               <BookOpen size={18} className="text-white" />
@@ -178,7 +178,7 @@ export default function Home() {
         </nav>
 
         {/* Hero Section */}
-        <section className="text-center mb-16">
+        <section className="text-center mb-24">
           <div className="inline-flex items-center gap-2 surface px-4 py-1.5 rounded-full text-xs text-gray-400 mb-8">
             <Sparkles size={12} className="text-blue-400" />
             <span>Interactive portfolio of books, reflections, and insights</span>
@@ -198,7 +198,7 @@ export default function Home() {
 
         {/* Dynamic Quote Spotlight */}
         {spotlightBook && activeView === "shelf" && (
-          <section className="surface p-6 md:p-8 mb-16 max-w-3xl mx-auto relative overflow-hidden">
+          <section className="surface p-6 md:p-8 mb-24 max-w-3xl mx-auto relative overflow-hidden">
             <div className="absolute top-4 left-4 text-neutral-800/20">
               <QuoteIcon size={80} />
             </div>
@@ -218,8 +218,8 @@ export default function Home() {
         {/* Main Content Area */}
         {activeView === "analytics" ? (
           /* Render Analytics Dashboard view */
-          <div className="space-y-6">
-            <div className="flex items-center justify-between mb-2">
+          <div className="space-y-12">
+            <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-xl font-bold text-gray-100">Visual Insights</h2>
                 <p className="text-xs text-gray-500 mt-0.5">Aggregate reading analytics graphs</p>
@@ -235,7 +235,7 @@ export default function Home() {
           </div>
         ) : (
           /* Render Book Shelf view */
-          <div className="space-y-8">
+          <div className="space-y-16">
             
             {/* Quick Stats Grid */}
             <div className="grid grid-cols-3 gap-3 md:gap-4 mb-8">
@@ -327,7 +327,7 @@ export default function Home() {
 
             {/* Books Grid */}
             {filteredBooks.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {filteredBooks.map((book, index) => (
                   <BookCard
                     key={book.id}
