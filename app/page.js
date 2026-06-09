@@ -14,6 +14,8 @@ export default function Home() {
   const [books, setBooks] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [activeView, setActiveView] = useState("shelf"); // "shelf" or "analytics"
+  const [showSplash, setShowSplash] = useState(true);
+  const [fadeSplash, setFadeSplash] = useState(false);
 
   // Filter States
   const [searchQuery, setSearchQuery] = useState("");
@@ -59,6 +61,22 @@ export default function Home() {
       localStorage.setItem("my_reading_list_books", JSON.stringify(defaultBooks));
     }
     setIsLoaded(true);
+  }, []);
+
+  // Splash Screen timer
+  useEffect(() => {
+    const fadeTimer = setTimeout(() => {
+      setFadeSplash(true);
+    }, 2500);
+
+    const removeTimer = setTimeout(() => {
+      setShowSplash(false);
+    }, 3500);
+
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(removeTimer);
+    };
   }, []);
 
   // 2. Select Spotlight Quote dynamically when books load/change
@@ -141,11 +159,51 @@ export default function Home() {
   return (
     <main className="relative min-h-screen bg-black">
       
+      {/* Splash Screen / Intro Landing */}
+      {showSplash && (
+        <div 
+          className={`fixed inset-0 z-50 flex flex-col items-center justify-center transition-all duration-1000 ${
+            fadeSplash ? "opacity-0 pointer-events-none scale-105" : "opacity-100"
+          }`}
+        >
+          {/* Background Image with Dark Overlay */}
+          <div 
+            className="absolute inset-0 bg-cover bg-center transition-transform duration-[4000ms] ease-out scale-100"
+            style={{ 
+              backgroundImage: "url('/library_background.png')",
+              filter: "brightness(0.25) contrast(1.1)"
+            }}
+          />
+          
+          {/* Content overlay */}
+          <div className="relative z-10 text-center px-6 max-w-2xl space-y-6">
+            <div className="w-16 h-16 rounded-2xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center mx-auto animate-pulse">
+              <BookOpen className="text-blue-400 w-8 h-8" />
+            </div>
+            
+            <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-white leading-tight">
+              Welcome to <span className="gradient-text">Sojib's Virtual Library</span>
+              <br />
+              <span className="text-sm md:text-lg font-medium text-gray-400 tracking-wide block mt-2">
+                Book Collections
+              </span>
+            </h1>
+            
+            {/* Loading Indicator */}
+            <div className="flex items-center justify-center gap-1.5 pt-4">
+              <span className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: "0ms" }} />
+              <span className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: "150ms" }} />
+              <span className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: "300ms" }} />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main page wrapper */}
       <div className="relative z-10 max-w-[1400px] mx-auto px-6 py-12">
         
         {/* Navigation Bar */}
-        <nav className="flex flex-col sm:flex-row items-center justify-between gap-6 mb-20">
+        <nav className="flex flex-col sm:flex-row items-center justify-between gap-6 mb-12">
           <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setActiveView("shelf")}>
             <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg">
               <BookOpen size={18} className="text-white" />
@@ -176,25 +234,6 @@ export default function Home() {
             </button>
           </div>
         </nav>
-
-        {/* Hero Section */}
-        <section className="text-center mb-24">
-          <div className="inline-flex items-center gap-2 surface px-4 py-1.5 rounded-full text-xs text-gray-400 mb-8">
-            <Sparkles size={12} className="text-blue-400" />
-            <span>Interactive portfolio of books, reflections, and insights</span>
-          </div>
-
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6 leading-tight">
-            Reading Shapes
-            <br />
-            <span className="gradient-text">Perspective</span>
-          </h1>
-
-          <p className="text-gray-400 text-sm md:text-base max-w-2xl mx-auto leading-relaxed">
-            A curated log of my educational readings, reviews, and insights. Filter through categories, 
-            explore rating trends, or check stats on genres and timeline logs below.
-          </p>
-        </section>
 
         {/* Dynamic Quote Spotlight */}
         {spotlightBook && activeView === "shelf" && (
