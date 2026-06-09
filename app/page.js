@@ -35,7 +35,21 @@ export default function Home() {
     const localData = localStorage.getItem("my_reading_list_books");
     if (localData) {
       try {
-        setBooks(JSON.parse(localData));
+        const parsed = JSON.parse(localData);
+        const existingIds = new Set(parsed.map((b) => b.id));
+        const existingTitles = new Set(parsed.map((b) => b.title.toLowerCase().trim()));
+        
+        const newDefaults = defaultBooks.filter(
+          (db) => !existingIds.has(db.id) && !existingTitles.has(db.title.toLowerCase().trim())
+        );
+
+        if (newDefaults.length > 0) {
+          const merged = [...newDefaults, ...parsed];
+          setBooks(merged);
+          localStorage.setItem("my_reading_list_books", JSON.stringify(merged));
+        } else {
+          setBooks(parsed);
+        }
       } catch (e) {
         setBooks(defaultBooks);
         localStorage.setItem("my_reading_list_books", JSON.stringify(defaultBooks));
