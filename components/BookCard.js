@@ -40,7 +40,7 @@ export default function BookCard({ book, onOpenDetails, onOpenEdit, onDelete, de
         }}>
           {book.genre}
         </span>
-        <span style={{ fontSize: '0.6rem', color: '#636d82', fontWeight: 500 }}>
+        <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)', fontWeight: 500 }}>
           {book.startMonth && book.startYear ? `${book.startMonth} ${book.startYear}` : ""}
         </span>
       </div>
@@ -48,18 +48,18 @@ export default function BookCard({ book, onOpenDetails, onOpenEdit, onDelete, de
       {/* Main Info */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', flex: 1 }}>
         <h3 style={{ 
-          fontSize: '0.9rem', fontWeight: 600, color: '#dce0e8', 
+          fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-main)', 
           lineHeight: 1.4, transition: 'color 0.2s ease',
           display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden'
         }} className="group-hover:text-indigo-400">
           {book.title}
         </h3>
-        <p style={{ fontSize: '0.75rem', color: '#636d82' }}>by {book.author}</p>
+        <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>by {book.author}</p>
         
         {/* Subtle key takeaway preview if exists */}
         {book.takeaway && (
           <p style={{ 
-            fontSize: '0.7rem', color: '#8b94a6', marginTop: '0.5rem', fontStyle: 'italic',
+            fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.5rem', fontStyle: 'italic',
             borderLeft: '2px solid rgba(99,102,241,0.15)', paddingLeft: '0.5rem',
             lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden'
           }}>
@@ -70,8 +70,8 @@ export default function BookCard({ book, onOpenDetails, onOpenEdit, onDelete, de
 
       {/* Footer Row */}
       <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        paddingTop: '0.75rem', borderTop: '1px solid rgba(255,255,255,0.04)', marginTop: '0.25rem'
+        display: 'flex', alignItems: 'center', justifycontent: 'space-between',
+        paddingTop: '0.75rem', borderTop: '1px solid var(--border-color)', marginTop: '0.25rem'
       }}>
         <span className={status.cls}>{status.label}</span>
         <StarRating rating={book.rating} />
@@ -83,11 +83,11 @@ export default function BookCard({ book, onOpenDetails, onOpenEdit, onDelete, de
           onClick={() => onOpenEdit(book)}
           style={{
             padding: 4, borderRadius: 6, 
-            background: 'rgba(22, 26, 36, 0.9)', border: '1px solid rgba(255,255,255,0.08)',
-            color: '#8b94a6', cursor: 'pointer', transition: 'all 0.2s ease'
+            background: 'var(--bg-input)', border: '1px solid var(--border-color)',
+            color: 'var(--text-btn-ghost)', cursor: 'pointer', transition: 'all 0.2s ease'
           }}
           onMouseEnter={(e) => { e.currentTarget.style.background = '#6366f1'; e.currentTarget.style.color = '#fff'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(22, 26, 36, 0.9)'; e.currentTarget.style.color = '#8b94a6'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--bg-input)'; e.currentTarget.style.color = 'var(--text-btn-ghost)'; }}
           title="Edit Book"
         >
           <Edit3 size={11} />
@@ -96,11 +96,11 @@ export default function BookCard({ book, onOpenDetails, onOpenEdit, onDelete, de
           onClick={() => onDelete(book.id)}
           style={{
             padding: 4, borderRadius: 6,
-            background: 'rgba(22, 26, 36, 0.9)', border: '1px solid rgba(255,255,255,0.08)',
-            color: '#8b94a6', cursor: 'pointer', transition: 'all 0.2s ease'
+            background: 'var(--bg-input)', border: '1px solid var(--border-color)',
+            color: 'var(--text-btn-ghost)', cursor: 'pointer', transition: 'all 0.2s ease'
           }}
           onMouseEnter={(e) => { e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.color = '#fff'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(22, 26, 36, 0.9)'; e.currentTarget.style.color = '#8b94a6'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--bg-input)'; e.currentTarget.style.color = 'var(--text-btn-ghost)'; }}
           title="Delete Book"
         >
           <Trash2 size={11} />

@@ -2,7 +2,8 @@
 import { useState, useEffect } from "react";
 import { 
   BookOpen, Sparkles, BarChart3, Star, BookMarked, 
-  Search, Plus, Filter, RotateCcw, Quote as QuoteIcon, Library, Trash2
+  Search, Plus, Filter, RotateCcw, Quote as QuoteIcon, Library, Trash2,
+  Sun, Moon
 } from "lucide-react";
 import { defaultBooks } from "@/data/defaultBooks";
 import { upcomingBooks } from "@/data/upcomingBooks";
@@ -10,6 +11,7 @@ import BookCard from "@/components/BookCard";
 import BookModal from "@/components/BookModal";
 import BookDetailsModal from "@/components/BookDetailsModal";
 import AnalyticsDashboard from "@/components/AnalyticsDashboard";
+import { useTheme } from "@/components/ThemeProvider";
 
 const MONTHS = [
   "January", "February", "March", "April", "May", "June",
@@ -17,6 +19,7 @@ const MONTHS = [
 ];
 
 export default function Home() {
+  const { theme, toggleTheme, mounted } = useTheme();
   const [books, setBooks] = useState([]);
   const [upcomingList, setUpcomingList] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -213,10 +216,10 @@ export default function Home() {
   // Loading state
   if (!isLoaded) {
     return (
-      <main style={{ minHeight: '100vh', background: '#0c0e14', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--bg-page)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div className="text-center" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
           <div style={{ width: 40, height: 40, border: '3px solid #6366f1', borderTopColor: 'transparent', borderRadius: '50%' }} className="animate-spin" />
-          <h2 style={{ fontSize: '0.85rem', fontWeight: 600, letterSpacing: '0.05em', color: '#636d82' }}>Loading Shelf...</h2>
+          <h2 style={{ fontSize: '0.85rem', fontWeight: 600, letterSpacing: '0.05em', color: 'var(--text-muted)' }}>Loading Shelf...</h2>
         </div>
       </main>
     );
@@ -229,7 +232,7 @@ export default function Home() {
     : "0.0";
 
   return (
-    <main style={{ position: 'relative', minHeight: '100vh', background: '#0c0e14' }}>
+    <main style={{ position: 'relative', minHeight: '100vh', background: 'var(--bg-page)', transition: 'background-color 0.3s ease' }}>
       
       {/* Splash Screen / Intro Landing */}
       {showSplash && (
@@ -286,9 +289,9 @@ export default function Home() {
         <nav style={{
           display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between',
           gap: '1rem', padding: '1rem 1.5rem',
-          background: 'rgba(22, 26, 36, 0.6)', backdropFilter: 'blur(16px)',
-          border: '1px solid rgba(255,255,255,0.04)', borderRadius: '1rem',
-          marginBottom: '3rem'
+          background: 'var(--bg-navbar)', backdropFilter: 'blur(16px)',
+          border: '1px solid var(--border-color)', borderRadius: '1rem',
+          marginBottom: '3rem', transition: 'background-color 0.3s ease, border-color 0.3s ease'
         }}>
           <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setActiveView("shelf")}>
             <div style={{
@@ -299,7 +302,7 @@ export default function Home() {
             }}>
               <BookOpen size={18} className="text-white" />
             </div>
-            <span style={{ color: '#dce0e8', fontWeight: 600, fontSize: '1rem', letterSpacing: '-0.01em' }}>
+            <span style={{ color: 'var(--text-main)', fontWeight: 600, fontSize: '1rem', letterSpacing: '-0.01em', transition: 'color 0.3s ease' }}>
               My<span className="gradient-text">Reading</span>List
             </span>
           </div>
@@ -327,6 +330,26 @@ export default function Home() {
               <BarChart3 size={13} />
               Analytics Dashboard
             </button>
+
+            {/* Theme Toggle Button */}
+            <button
+              onClick={toggleTheme}
+              className="btn-ghost flex items-center justify-center cursor-pointer transition-transform duration-300 hover:scale-110 active:scale-95"
+              style={{
+                width: 34,
+                height: 34,
+                padding: 0,
+                borderRadius: "50%",
+                border: "1px solid var(--border-btn-ghost)",
+              }}
+              title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            >
+              {mounted && theme === "dark" ? (
+                <Sun size={15} className="text-amber-400" />
+              ) : (
+                <Moon size={15} className="text-indigo-400" />
+              )}
+            </button>
           </div>
         </nav>
 
@@ -336,24 +359,24 @@ export default function Home() {
         {spotlightBook && activeView === "shelf" && (
           <section style={{ 
             maxWidth: 720, margin: '0 auto 4rem', padding: '2rem 2.5rem',
-            background: 'linear-gradient(145deg, rgba(22, 26, 36, 0.8), rgba(18, 21, 30, 0.9))',
-            border: '1px solid rgba(255,255,255,0.04)', borderRadius: '1rem',
-            position: 'relative', overflow: 'hidden'
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border-color)', borderRadius: '1rem',
+            position: 'relative', overflow: 'hidden', transition: 'background-color 0.3s ease, border-color 0.3s ease'
           }}>
             {/* Decorative accent line */}
             <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 60, height: 3, borderRadius: 2, background: 'linear-gradient(90deg, #6366f1, #818cf8)' }} />
             
-            <div style={{ position: 'absolute', top: 16, left: 16, opacity: 0.06 }}>
+            <div style={{ position: 'absolute', top: 16, left: 16, opacity: 0.06, color: 'var(--text-main)' }}>
               <QuoteIcon size={80} />
             </div>
             <div style={{ position: 'relative', zIndex: 10, textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <p style={{ color: '#b8bfcc', fontWeight: 500, fontStyle: 'italic', fontSize: '1rem', lineHeight: 1.7 }}>
+              <p style={{ color: 'var(--text-main)', fontWeight: 500, fontStyle: 'italic', fontSize: '1rem', lineHeight: 1.7, transition: 'color 0.3s ease' }}>
                 "{spotlightBook.quote}"
               </p>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: '0.75rem' }}>
                 <span style={{ color: '#818cf8', fontWeight: 600 }}>{spotlightBook.title}</span>
-                <span style={{ color: '#49516a' }}>—</span>
-                <span style={{ color: '#636d82' }}>{spotlightBook.author}</span>
+                <span style={{ color: 'var(--text-muted)' }}>—</span>
+                <span style={{ color: 'var(--text-muted)' }}>{spotlightBook.author}</span>
               </div>
             </div>
           </section>
@@ -367,8 +390,8 @@ export default function Home() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
               <div>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#f0f1f5' }}>Visual Insights</h2>
-                <p style={{ fontSize: '0.75rem', color: '#636d82', marginTop: 2 }}>Aggregate reading analytics graphs</p>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-highlight)' }}>Visual Insights</h2>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 2 }}>Aggregate reading analytics graphs</p>
               </div>
               <button 
                 onClick={() => setActiveView("shelf")}
@@ -389,16 +412,16 @@ export default function Home() {
             <section style={{ marginBottom: '3rem' }}>
               <div className="grid grid-cols-3 gap-4 md:gap-5">
                 <div className="surface" style={{ padding: '1.25rem', textAlign: 'center' }}>
-                  <div style={{ fontSize: 'clamp(1.25rem, 3vw, 1.75rem)', fontWeight: 700, color: '#dce0e8' }}>{books.length}</div>
-                  <div style={{ fontSize: '0.6rem', color: '#636d82', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 4, fontWeight: 600 }}>Shelf Items</div>
+                  <div style={{ fontSize: 'clamp(1.25rem, 3vw, 1.75rem)', fontWeight: 700, color: 'var(--text-main)' }}>{books.length}</div>
+                  <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 4, fontWeight: 600 }}>Shelf Items</div>
                 </div>
                 <div className="surface" style={{ padding: '1.25rem', textAlign: 'center' }}>
                   <div style={{ fontSize: 'clamp(1.25rem, 3vw, 1.75rem)', fontWeight: 700, color: '#818cf8' }}>{totalRead}</div>
-                  <div style={{ fontSize: '0.6rem', color: '#636d82', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 4, fontWeight: 600 }}>Completed</div>
+                  <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 4, fontWeight: 600 }}>Completed</div>
                 </div>
                 <div className="surface" style={{ padding: '1.25rem', textAlign: 'center' }}>
                   <div style={{ fontSize: 'clamp(1.25rem, 3vw, 1.75rem)', fontWeight: 700, color: '#fbbf24' }}>{avgRating}★</div>
-                  <div style={{ fontSize: '0.6rem', color: '#636d82', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 4, fontWeight: 600 }}>Avg Rating</div>
+                  <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 4, fontWeight: 600 }}>Avg Rating</div>
                 </div>
               </div>
             </section>
@@ -409,9 +432,9 @@ export default function Home() {
             {/* ── SECTION 4: Filter & Control Bar ── */}
             <section style={{ 
               marginBottom: '3rem', padding: '1.25rem 1.5rem',
-              background: 'rgba(22, 26, 36, 0.5)', backdropFilter: 'blur(12px)',
-              border: '1px solid rgba(255,255,255,0.04)', borderRadius: '1rem',
-              position: 'sticky', top: 0, zIndex: 20
+              background: 'var(--bg-navbar)', backdropFilter: 'blur(12px)',
+              border: '1px solid var(--border-color)', borderRadius: '1rem',
+              position: 'sticky', top: 0, zIndex: 20, transition: 'background-color 0.3s ease, border-color 0.3s ease'
             }}>
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 
@@ -419,7 +442,7 @@ export default function Home() {
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1 w-full">
                   {/* Search Box */}
                   <div className="relative flex-1 min-w-0 sm:max-w-xs">
-                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#636d82' }} />
+                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
                     <input
                       type="text"
                       value={searchQuery}
@@ -429,11 +452,11 @@ export default function Home() {
                       style={{ paddingLeft: '2.25rem', fontSize: '0.8rem', padding: '0.55rem 0.85rem 0.55rem 2.25rem' }}
                     />
                   </div>
-
+ 
                   <div className="flex items-center gap-2 w-full sm:w-auto">
                     {/* Genre Select */}
                     <div className="flex items-center gap-1.5 flex-1 sm:flex-initial">
-                      <Filter size={12} style={{ color: '#636d82', flexShrink: 0 }} />
+                      <Filter size={12} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
                       <select
                         value={selectedGenre}
                         onChange={(e) => setSelectedGenre(e.target.value)}
@@ -441,41 +464,41 @@ export default function Home() {
                         style={{ padding: '0.55rem 0.75rem', fontSize: '0.8rem' }}
                       >
                         {availableGenres.map((g) => (
-                          <option key={g} value={g} style={{ background: '#10131a' }}>{g}</option>
+                          <option key={g} value={g} style={{ background: 'var(--bg-input-option)', color: 'var(--text-main)' }}>{g}</option>
                         ))}
                       </select>
                     </div>
-
+ 
                     {/* Status Select */}
                     <div className="flex items-center gap-1.5 flex-1 sm:flex-initial">
-                      <BookMarked size={12} style={{ color: '#636d82', flexShrink: 0 }} />
+                      <BookMarked size={12} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
                       <select
                         value={selectedStatus}
                         onChange={(e) => setSelectedStatus(e.target.value)}
                         className="input-dark cursor-pointer"
                         style={{ padding: '0.55rem 0.75rem', fontSize: '0.8rem' }}
                       >
-                        <option value="All" style={{ background: '#10131a' }}>All Status</option>
-                        <option value="completed" style={{ background: '#10131a' }}>Completed</option>
-                        <option value="reading" style={{ background: '#10131a' }}>Reading</option>
-                        <option value="to-read" style={{ background: '#10131a' }}>To Read</option>
+                        <option value="All" style={{ background: 'var(--bg-input-option)', color: 'var(--text-main)' }}>All Status</option>
+                        <option value="completed" style={{ background: 'var(--bg-input-option)', color: 'var(--text-main)' }}>Completed</option>
+                        <option value="reading" style={{ background: 'var(--bg-input-option)', color: 'var(--text-main)' }}>Reading</option>
+                        <option value="to-read" style={{ background: 'var(--bg-input-option)', color: 'var(--text-main)' }}>To Read</option>
                       </select>
                     </div>
                   </div>
                 </div>
-
+ 
                 {/* Right Side: Add Button & Reset */}
                 <div className="flex items-center gap-2 w-full md:w-auto justify-end">
                   <button
                     onClick={handleResetDefaults}
                     style={{ 
-                      padding: 8, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.06)',
-                      background: 'transparent', color: '#636d82', cursor: 'pointer',
+                      padding: 8, borderRadius: '50%', border: '1px solid var(--border-color)',
+                      background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer',
                       transition: 'all 0.2s ease'
                     }}
                     title="Reset list to sample defaults"
-                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; e.currentTarget.style.color = '#dce0e8'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = '#636d82'; }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(99, 102, 241, 0.25)'; e.currentTarget.style.color = 'var(--text-highlight)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-color)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
                   >
                     <RotateCcw size={14} />
                   </button>
@@ -521,14 +544,14 @@ export default function Home() {
                 <div className="surface" style={{ padding: '3rem 2rem', textAlign: 'center', maxWidth: 440, margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
                   <div style={{ 
                     width: 56, height: 56, borderRadius: 16, 
-                    background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.1)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#636d82'
+                    background: 'var(--bg-btn-ghost-hover)', border: '1px solid var(--border-color)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)'
                   }}>
                     <BookOpen size={24} />
                   </div>
                   <div>
-                    <h3 style={{ fontSize: '0.9rem', fontWeight: 600, color: '#b8bfcc' }}>No books found</h3>
-                    <p style={{ fontSize: '0.75rem', color: '#636d82', marginTop: 4 }}>
+                    <h3 style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-highlight)' }}>No books found</h3>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 4 }}>
                       Try adjusting your search queries, clearing your filters, or adding a new book to the shelf.
                     </p>
                   </div>
@@ -555,17 +578,17 @@ export default function Home() {
             <section style={{ marginBottom: '4rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem', justifyContent: 'space-between' }}>
                 <div>
-                  <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#f0f1f5', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-highlight)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <Sparkles size={16} className="text-indigo-400" />
                     Upcoming New Book Collection
                   </h2>
-                  <p style={{ fontSize: '0.75rem', color: '#636d82', marginTop: 2 }}>Curated queue of books to read next</p>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 2 }}>Curated queue of books to read next</p>
                 </div>
-                <div style={{ fontSize: '0.7rem', color: '#636d82', background: 'rgba(99, 102, 241, 0.05)', padding: '0.35rem 0.75rem', borderRadius: '0.5rem', border: '1px solid rgba(99, 102, 241, 0.1)', fontWeight: 500 }}>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', background: 'var(--bg-btn-ghost-hover)', padding: '0.35rem 0.75rem', borderRadius: '0.5rem', border: '1px solid var(--border-color)', fontWeight: 500 }}>
                   <span style={{ fontWeight: 700, color: '#818cf8' }}>{filteredUpcoming.length}</span> {filteredUpcoming.length === 1 ? 'book' : 'books'} queued
                 </div>
               </div>
-
+ 
               {filteredUpcoming.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
                   {filteredUpcoming.map((book) => (
@@ -577,10 +600,10 @@ export default function Home() {
                         display: 'flex',
                         flexDirection: 'column',
                         gap: '1rem',
-                        background: 'rgba(22, 26, 36, 0.4)',
-                        border: '1px dashed rgba(99, 102, 241, 0.2)',
+                        background: 'var(--bg-card-upcoming)',
+                        border: '1px dashed var(--border-color)',
                         borderRadius: '1rem',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                        boxShadow: 'var(--shadow-card)'
                       }}
                     >
                       {/* Top row: Genre and Status */}
@@ -595,24 +618,24 @@ export default function Home() {
                         </span>
                         <span style={{
                           fontSize: '0.6rem', fontWeight: 600,
-                          color: '#b8bfcc', background: 'rgba(255, 255, 255, 0.05)',
+                          color: 'var(--text-muted)', background: 'var(--bg-btn-ghost-hover)',
                           padding: '0.2rem 0.5rem', borderRadius: 6
                         }}>
                           Upcoming
                         </span>
                       </div>
-
+ 
                       {/* Main Info */}
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', flex: 1 }}>
                         <h3 style={{ 
-                          fontSize: '0.85rem', fontWeight: 600, color: '#dce0e8', 
+                          fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-main)', 
                           lineHeight: 1.4,
                           display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
                           overflow: 'hidden'
                         }}>
                           {book.title}
                         </h3>
-                        <p style={{ fontSize: '0.75rem', color: '#636d82' }}>by {book.author}</p>
+                        <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>by {book.author}</p>
                       </div>
 
                       {/* Action Row */}
@@ -651,9 +674,9 @@ export default function Home() {
         {/* ═══════════════════════════════════════════════════ */}
         <footer style={{ 
           marginTop: '5rem', paddingTop: '1.5rem', paddingBottom: '1rem',
-          borderTop: '1px solid rgba(255,255,255,0.04)',
+          borderTop: '1px solid var(--border-color)',
           display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between',
-          fontSize: '0.65rem', color: '#49516a', gap: '1rem'
+          fontSize: '0.65rem', color: 'var(--text-muted)', gap: '1rem'
         }}>
           <div>
             Built with Next.js App Router · Tailwind CSS v4 · Minimal Dark Theme

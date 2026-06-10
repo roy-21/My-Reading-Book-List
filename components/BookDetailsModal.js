@@ -16,15 +16,15 @@ export default function BookDetailsModal({ isOpen, onClose, book, onOpenEdit, on
     <div style={{
       position: 'fixed', inset: 0, zIndex: 50,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'rgba(12, 14, 20, 0.88)', backdropFilter: 'blur(8px)',
+      background: 'rgba(15, 23, 42, 0.7)', backdropFilter: 'blur(8px)',
       padding: '1rem', overflowY: 'auto'
     }}>
       <div
         style={{
           width: '100%', maxWidth: 640, overflow: 'hidden',
-          background: 'linear-gradient(145deg, #161a24 0%, #12151e 100%)',
-          border: '1px solid rgba(255,255,255,0.06)', borderRadius: '1rem',
-          boxShadow: '0 24px 64px rgba(0,0,0,0.5)',
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border-color)', borderRadius: '1rem',
+          boxShadow: 'var(--shadow-lg)',
           display: 'flex', flexDirection: 'column', margin: 'auto', maxHeight: '90vh'
         }}
         onClick={(e) => e.stopPropagation()}
@@ -58,22 +58,22 @@ export default function BookDetailsModal({ isOpen, onClose, book, onOpenEdit, on
           <div style={{
             display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '1rem',
             padding: '0.85rem 1rem', borderRadius: 12,
-            background: 'rgba(12, 14, 20, 0.5)', border: '1px solid rgba(255,255,255,0.04)'
+            background: 'var(--bg-input)', border: '1px solid var(--border-color)'
           }}>
             <div className="flex items-center gap-2">
-              <span style={{ fontSize: '0.7rem', color: '#636d82', fontWeight: 500, textTransform: 'uppercase' }}>Status:</span>
+              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 500, textTransform: 'uppercase' }}>Status:</span>
               <span className={status.cls}>{status.label}</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span style={{ fontSize: '0.7rem', color: '#636d82', fontWeight: 500, textTransform: 'uppercase' }}>Rating:</span>
+              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 500, textTransform: 'uppercase' }}>Rating:</span>
               <div className="flex gap-0.5">
                 {Array.from({ length: 5 }, (_, i) => (
-                  <Star key={i} size={13} className={i < book.rating ? "fill-amber-400 text-amber-400" : "text-gray-700"} />
+                  <Star key={i} size={13} className={i < book.rating ? "fill-amber-400 text-amber-400" : "text-gray-400"} />
                 ))}
               </div>
             </div>
             {book.startMonth && book.startYear && (
-              <div className="flex items-center gap-1.5" style={{ fontSize: '0.75rem', color: '#8b94a6' }}>
+              <div className="flex items-center gap-1.5" style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                 <Calendar size={12} style={{ color: '#818cf8' }} />
                 <span>{book.startMonth} {book.startYear}</span>
               </div>
@@ -84,10 +84,10 @@ export default function BookDetailsModal({ isOpen, onClose, book, onOpenEdit, on
           {book.quote && (
             <div style={{
               position: 'relative', padding: '1rem 1.25rem', borderRadius: 12,
-              background: 'rgba(12, 14, 20, 0.5)', border: '1px solid rgba(255,255,255,0.04)'
+              background: 'var(--bg-input)', border: '1px solid var(--border-color)'
             }}>
               <Quote size={28} style={{ position: 'absolute', top: 8, left: 8, opacity: 0.06, transform: 'rotate(180deg)' }} />
-              <p style={{ position: 'relative', zIndex: 10, fontStyle: 'italic', color: '#b8bfcc', fontSize: '0.875rem', lineHeight: 1.7, paddingLeft: '1.25rem' }}>
+              <p style={{ position: 'relative', zIndex: 10, fontStyle: 'italic', color: 'var(--text-main)', fontSize: '0.875rem', lineHeight: 1.7, paddingLeft: '1.25rem' }}>
                 &ldquo;{book.quote}&rdquo;
               </p>
             </div>
@@ -96,22 +96,22 @@ export default function BookDetailsModal({ isOpen, onClose, book, onOpenEdit, on
           {/* Takeaway */}
           {book.takeaway && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <div className="flex items-center gap-1.5" style={{ fontSize: '0.875rem', fontWeight: 600, color: '#dce0e8' }}>
+              <div className="flex items-center gap-1.5" style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-highlight)' }}>
                 <Lightbulb size={14} style={{ color: '#fbbf24' }} />
                 <span>Key Takeaway</span>
               </div>
-              <p style={{ color: '#8b94a6', fontSize: '0.85rem', lineHeight: 1.6, paddingLeft: '1.25rem' }}>{book.takeaway}</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', lineHeight: 1.6, paddingLeft: '1.25rem' }}>{book.takeaway}</p>
             </div>
           )}
 
           {/* Review */}
           {book.review && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <div className="flex items-center gap-1.5" style={{ fontSize: '0.875rem', fontWeight: 600, color: '#dce0e8' }}>
+              <div className="flex items-center gap-1.5" style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-highlight)' }}>
                 <BookOpen size={14} style={{ color: '#818cf8' }} />
                 <span>My Review</span>
               </div>
-              <p style={{ color: '#8b94a6', fontSize: '0.85rem', lineHeight: 1.6, paddingLeft: '1.25rem', whiteSpace: 'pre-line' }}>{book.review}</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', lineHeight: 1.6, paddingLeft: '1.25rem', whiteSpace: 'pre-line' }}>{book.review}</p>
             </div>
           )}
         </div>
@@ -120,7 +120,7 @@ export default function BookDetailsModal({ isOpen, onClose, book, onOpenEdit, on
         <div style={{
           display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between',
           gap: '0.75rem', padding: '1.25rem 1.5rem',
-          borderTop: '1px solid rgba(255,255,255,0.04)', background: 'rgba(12, 14, 20, 0.4)'
+          borderTop: '1px solid var(--border-color)', background: 'var(--bg-card-upcoming)'
         }}>
           <div style={{ display: 'flex', gap: '0.5rem', flex: '1 1 auto' }}>
             <button
