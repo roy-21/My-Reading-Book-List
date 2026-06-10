@@ -26,7 +26,7 @@ export default function RootLayout({ children }) {
     <html lang="en" className={`${outfit.className} dark`}>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="theme-color" content="#000000" />
+        <meta name="theme-color" content="#0c0e14" />
       </head>
       <body className="min-h-screen antialiased">
         {children}

@@ -2,16 +2,23 @@
 import { useState, useEffect } from "react";
 import { 
   BookOpen, Sparkles, BarChart3, Star, BookMarked, 
-  Search, Plus, Filter, RotateCcw, Quote as QuoteIcon, Library
+  Search, Plus, Filter, RotateCcw, Quote as QuoteIcon, Library, Trash2
 } from "lucide-react";
 import { defaultBooks } from "@/data/defaultBooks";
+import { upcomingBooks } from "@/data/upcomingBooks";
 import BookCard from "@/components/BookCard";
 import BookModal from "@/components/BookModal";
 import BookDetailsModal from "@/components/BookDetailsModal";
 import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 
+const MONTHS = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
 export default function Home() {
   const [books, setBooks] = useState([]);
+  const [upcomingList, setUpcomingList] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [activeView, setActiveView] = useState("shelf"); // "shelf" or "analytics"
   const [showSplash, setShowSplash] = useState(true);
@@ -60,6 +67,21 @@ export default function Home() {
       setBooks(defaultBooks);
       localStorage.setItem("my_reading_list_books", JSON.stringify(defaultBooks));
     }
+
+    // Load upcoming books
+    const localUpcoming = localStorage.getItem("my_reading_list_upcoming");
+    if (localUpcoming) {
+      try {
+        setUpcomingList(JSON.parse(localUpcoming));
+      } catch (e) {
+        setUpcomingList(upcomingBooks);
+        localStorage.setItem("my_reading_list_upcoming", JSON.stringify(upcomingBooks));
+      }
+    } else {
+      setUpcomingList(upcomingBooks);
+      localStorage.setItem("my_reading_list_upcoming", JSON.stringify(upcomingBooks));
+    }
+
     setIsLoaded(true);
   }, []);
 
@@ -106,6 +128,17 @@ export default function Home() {
     }
     setBooks(updatedBooks);
     localStorage.setItem("my_reading_list_books", JSON.stringify(updatedBooks));
+    
+    // If it was added from upcoming list, remove it from there
+    const matchedUpcoming = upcomingList.find(
+      (ub) => ub.title.toLowerCase().trim() === savedBook.title.toLowerCase().trim()
+    );
+    if (matchedUpcoming) {
+      const updatedUpcoming = upcomingList.filter((ub) => ub.id !== matchedUpcoming.id);
+      setUpcomingList(updatedUpcoming);
+      localStorage.setItem("my_reading_list_upcoming", JSON.stringify(updatedUpcoming));
+    }
+    
     setBookToEdit(null);
   };
 
@@ -119,14 +152,44 @@ export default function Home() {
     if (confirm("This will reset all your changes and restore the default reading list. Proceed?")) {
       setBooks(defaultBooks);
       localStorage.setItem("my_reading_list_books", JSON.stringify(defaultBooks));
+      
+      setUpcomingList(upcomingBooks);
+      localStorage.setItem("my_reading_list_upcoming", JSON.stringify(upcomingBooks));
+      
       setSearchQuery("");
       setSelectedGenre("All");
       setSelectedStatus("All");
     }
   };
 
-  // Get unique genres dynamically from book list
-  const availableGenres = ["All", ...new Set(books.map((b) => b.genre))];
+  const handleAddUpcomingToShelf = (upcomingBook) => {
+    setBookToEdit({
+      title: upcomingBook.title,
+      author: upcomingBook.author,
+      genre: upcomingBook.genre,
+      status: "to-read",
+      rating: 5,
+      startYear: new Date().getFullYear(),
+      startMonth: MONTHS[new Date().getMonth()],
+      review: "",
+      takeaway: "",
+      quote: "",
+      coverGradient: upcomingBook.coverGradient || "from-slate-900 to-blue-950"
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteUpcomingBook = (id) => {
+    const updated = upcomingList.filter((b) => b.id !== id);
+    setUpcomingList(updated);
+    localStorage.setItem("my_reading_list_upcoming", JSON.stringify(updated));
+  };
+
+  // Get unique genres dynamically from both book lists
+  const availableGenres = ["All", ...new Set([
+    ...books.map((b) => b.genre),
+    ...upcomingList.map((b) => b.genre)
+  ])];
 
   // Filter books based on search & selectors
   const filteredBooks = books.filter((book) => {
@@ -138,13 +201,22 @@ export default function Home() {
     return matchesSearch && matchesGenre && matchesStatus;
   });
 
+  // Filter upcoming books based on search & genre selector
+  const filteredUpcoming = upcomingList.filter((book) => {
+    const matchesSearch = 
+      book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      book.author.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesGenre = selectedGenre === "All" || book.genre === selectedGenre;
+    return matchesSearch && matchesGenre;
+  });
+
   // Loading state
   if (!isLoaded) {
     return (
-      <main className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto" />
-          <h2 className="text-sm font-semibold tracking-wide text-gray-400">Loading Shelf...</h2>
+      <main style={{ minHeight: '100vh', background: '#0c0e14', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="text-center" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ width: 40, height: 40, border: '3px solid #6366f1', borderTopColor: 'transparent', borderRadius: '50%' }} className="animate-spin" />
+          <h2 style={{ fontSize: '0.85rem', fontWeight: 600, letterSpacing: '0.05em', color: '#636d82' }}>Loading Shelf...</h2>
         </div>
       </main>
     );
@@ -157,7 +229,7 @@ export default function Home() {
     : "0.0";
 
   return (
-    <main className="relative min-h-screen bg-black">
+    <main style={{ position: 'relative', minHeight: '100vh', background: '#0c0e14' }}>
       
       {/* Splash Screen / Intro Landing */}
       {showSplash && (
@@ -171,63 +243,86 @@ export default function Home() {
             className="absolute inset-0 bg-cover bg-center transition-transform duration-[4000ms] ease-out scale-100"
             style={{ 
               backgroundImage: "url('/library_background.png')",
-              filter: "brightness(0.25) contrast(1.1)"
+              filter: "brightness(0.2) contrast(1.1) saturate(0.7)"
             }}
           />
+          {/* Gradient overlay for depth */}
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(12,14,20,0.5) 0%, rgba(12,14,20,0.85) 100%)' }} />
           
           {/* Content overlay */}
-          <div className="relative z-10 text-center px-6 max-w-2xl space-y-6">
-            <div className="w-16 h-16 rounded-2xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center mx-auto animate-pulse">
-              <BookOpen className="text-blue-400 w-8 h-8" />
+          <div className="relative z-10 text-center px-6 max-w-2xl" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
+            <div style={{ 
+              width: 72, height: 72, borderRadius: 20, 
+              background: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(99, 102, 241, 0.2)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center'
+            }} className="animate-pulse">
+              <BookOpen className="text-indigo-400 w-9 h-9" />
             </div>
             
-            <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-white leading-tight">
+            <h1 style={{ fontSize: 'clamp(1.75rem, 5vw, 3rem)', fontWeight: 700, letterSpacing: '-0.02em', color: '#fff', lineHeight: 1.2 }}>
               Welcome to <span className="gradient-text">Sojib's Virtual Library</span>
               <br />
-              <span className="text-sm md:text-lg font-medium text-gray-400 tracking-wide block mt-2">
+              <span style={{ fontSize: 'clamp(0.8rem, 2vw, 1rem)', fontWeight: 500, color: '#636d82', letterSpacing: '0.05em', display: 'block', marginTop: '0.5rem' }}>
                 Book Collections
               </span>
             </h1>
             
             {/* Loading Indicator */}
-            <div className="flex items-center justify-center gap-1.5 pt-4">
-              <span className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: "0ms" }} />
-              <span className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: "150ms" }} />
-              <span className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: "300ms" }} />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, paddingTop: '0.5rem' }}>
+              <span className="animate-bounce" style={{ width: 8, height: 8, borderRadius: '50%', background: '#6366f1', animationDelay: '0ms' }} />
+              <span className="animate-bounce" style={{ width: 8, height: 8, borderRadius: '50%', background: '#6366f1', animationDelay: '150ms' }} />
+              <span className="animate-bounce" style={{ width: 8, height: 8, borderRadius: '50%', background: '#6366f1', animationDelay: '300ms' }} />
             </div>
           </div>
         </div>
       )}
 
       {/* Main page wrapper */}
-      <div className="relative z-10 max-w-[1400px] mx-auto px-6 py-12">
+      <div style={{ position: 'relative', zIndex: 10, maxWidth: 1400, margin: '0 auto', padding: '2rem 1.5rem 3rem' }}>
         
-        {/* Navigation Bar */}
-        <nav className="flex flex-col sm:flex-row items-center justify-between gap-6 mb-12">
+        {/* ═══════════════════════════════════════════════════ */}
+        {/* SECTION 1: Navigation Bar                          */}
+        {/* ═══════════════════════════════════════════════════ */}
+        <nav style={{
+          display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between',
+          gap: '1rem', padding: '1rem 1.5rem',
+          background: 'rgba(22, 26, 36, 0.6)', backdropFilter: 'blur(16px)',
+          border: '1px solid rgba(255,255,255,0.04)', borderRadius: '1rem',
+          marginBottom: '3rem'
+        }}>
           <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setActiveView("shelf")}>
-            <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg">
+            <div style={{
+              width: 38, height: 38, borderRadius: 12, 
+              background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 2px 12px rgba(99, 102, 241, 0.3)'
+            }}>
               <BookOpen size={18} className="text-white" />
             </div>
-            <span className="text-gray-200 font-semibold text-base tracking-tight">
+            <span style={{ color: '#dce0e8', fontWeight: 600, fontSize: '1rem', letterSpacing: '-0.01em' }}>
               My<span className="gradient-text">Reading</span>List
             </span>
           </div>
 
-          <div className="flex items-center gap-3 w-full sm:w-auto justify-center sm:justify-end">
+          <div className="flex items-center gap-3" style={{ flexWrap: 'wrap' }}>
             <button 
               onClick={() => setActiveView("shelf")}
-              className={`btn-ghost text-xs py-2 px-4 flex items-center gap-1.5 flex-1 sm:flex-initial justify-center ${
-                activeView === "shelf" ? "bg-base-800 text-white border-base-700" : ""
-              }`}
+              className={`btn-ghost text-xs flex items-center gap-1.5 justify-center`}
+              style={{
+                padding: '0.5rem 1rem',
+                ...(activeView === "shelf" ? { background: 'rgba(99,102,241,0.1)', borderColor: 'rgba(99,102,241,0.2)', color: '#818cf8' } : {})
+              }}
             >
               <Library size={13} />
               Book Collection
             </button>
             <button 
               onClick={() => setActiveView("analytics")}
-              className={`btn-ghost text-xs py-2 px-4 flex items-center gap-1.5 flex-1 sm:flex-initial justify-center ${
-                activeView === "analytics" ? "bg-base-800 text-white border-base-700" : ""
-              }`}
+              className={`btn-ghost text-xs flex items-center gap-1.5 justify-center`}
+              style={{
+                padding: '0.5rem 1rem',
+                ...(activeView === "analytics" ? { background: 'rgba(99,102,241,0.1)', borderColor: 'rgba(99,102,241,0.2)', color: '#818cf8' } : {})
+              }}
             >
               <BarChart3 size={13} />
               Analytics Dashboard
@@ -235,20 +330,30 @@ export default function Home() {
           </div>
         </nav>
 
-        {/* Dynamic Quote Spotlight */}
+        {/* ═══════════════════════════════════════════════════ */}
+        {/* SECTION 2: Dynamic Quote Spotlight                 */}
+        {/* ═══════════════════════════════════════════════════ */}
         {spotlightBook && activeView === "shelf" && (
-          <section className="surface p-6 md:p-8 mb-24 max-w-3xl mx-auto relative overflow-hidden">
-            <div className="absolute top-4 left-4 text-neutral-800/20">
+          <section style={{ 
+            maxWidth: 720, margin: '0 auto 4rem', padding: '2rem 2.5rem',
+            background: 'linear-gradient(145deg, rgba(22, 26, 36, 0.8), rgba(18, 21, 30, 0.9))',
+            border: '1px solid rgba(255,255,255,0.04)', borderRadius: '1rem',
+            position: 'relative', overflow: 'hidden'
+          }}>
+            {/* Decorative accent line */}
+            <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 60, height: 3, borderRadius: 2, background: 'linear-gradient(90deg, #6366f1, #818cf8)' }} />
+            
+            <div style={{ position: 'absolute', top: 16, left: 16, opacity: 0.06 }}>
               <QuoteIcon size={80} />
             </div>
-            <div className="relative z-10 text-center space-y-4">
-              <p className="text-gray-300 font-medium italic text-base leading-relaxed">
+            <div style={{ position: 'relative', zIndex: 10, textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <p style={{ color: '#b8bfcc', fontWeight: 500, fontStyle: 'italic', fontSize: '1rem', lineHeight: 1.7 }}>
                 "{spotlightBook.quote}"
               </p>
-              <div className="flex items-center justify-center gap-2 text-xs">
-                <span className="text-blue-400 font-semibold">{spotlightBook.title}</span>
-                <span className="text-gray-600">—</span>
-                <span className="text-gray-500">{spotlightBook.author}</span>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: '0.75rem' }}>
+                <span style={{ color: '#818cf8', fontWeight: 600 }}>{spotlightBook.title}</span>
+                <span style={{ color: '#49516a' }}>—</span>
+                <span style={{ color: '#636d82' }}>{spotlightBook.author}</span>
               </div>
             </div>
           </section>
@@ -256,16 +361,18 @@ export default function Home() {
 
         {/* Main Content Area */}
         {activeView === "analytics" ? (
-          /* Render Analytics Dashboard view */
-          <div className="space-y-12">
-            <div className="flex items-center justify-between mb-6">
+          /* ═══════════════════════════════════════════════════ */
+          /* Analytics Dashboard view                           */
+          /* ═══════════════════════════════════════════════════ */
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
               <div>
-                <h2 className="text-xl font-bold text-gray-100">Visual Insights</h2>
-                <p className="text-xs text-gray-500 mt-0.5">Aggregate reading analytics graphs</p>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#f0f1f5' }}>Visual Insights</h2>
+                <p style={{ fontSize: '0.75rem', color: '#636d82', marginTop: 2 }}>Aggregate reading analytics graphs</p>
               </div>
               <button 
                 onClick={() => setActiveView("shelf")}
-                className="btn-ghost py-1.5 px-4 text-xs"
+                className="btn-ghost" style={{ padding: '0.4rem 1rem', fontSize: '0.75rem' }}
               >
                 ← Back to Books
               </button>
@@ -273,149 +380,281 @@ export default function Home() {
             <AnalyticsDashboard books={books} />
           </div>
         ) : (
-          /* Render Book Shelf view */
-          <div className="space-y-16">
+          /* ═══════════════════════════════════════════════════ */
+          /* Book Shelf view                                     */
+          /* ═══════════════════════════════════════════════════ */
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             
-            {/* Quick Stats Grid */}
-            <div className="grid grid-cols-3 gap-3 md:gap-4 mb-8">
-              <div className="surface p-3 md:p-4 text-center">
-                <div className="text-lg md:text-2xl font-bold text-gray-200">{books.length}</div>
-                <div className="text-[9px] md:text-[10px] text-gray-500 uppercase tracking-wider mt-0.5 font-semibold">Shelf Items</div>
-              </div>
-              <div className="surface p-3 md:p-4 text-center">
-                <div className="text-lg md:text-2xl font-bold text-blue-400">{totalRead}</div>
-                <div className="text-[9px] md:text-[10px] text-gray-500 uppercase tracking-wider mt-0.5 font-semibold">Completed</div>
-              </div>
-              <div className="surface p-3 md:p-4 text-center">
-                <div className="text-lg md:text-2xl font-bold text-amber-400">{avgRating}★</div>
-                <div className="text-[9px] md:text-[10px] text-gray-500 uppercase tracking-wider mt-0.5 font-semibold">Avg Rating</div>
-              </div>
-            </div>
-
-            {/* Filter and Control Bar */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-4 border-b border-t border-base-800 bg-black/90 backdrop-blur-md z-20 md:sticky md:top-0">
-              
-              {/* Left Side: Search & Filter dropdowns */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1 w-full">
-                {/* Search Box */}
-                <div className="relative flex-1 min-w-0 sm:max-w-xs">
-                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search title, author..."
-                    className="input-dark pl-9 text-xs py-2 w-full"
-                  />
+            {/* ── SECTION 3: Quick Stats ── */}
+            <section style={{ marginBottom: '3rem' }}>
+              <div className="grid grid-cols-3 gap-4 md:gap-5">
+                <div className="surface" style={{ padding: '1.25rem', textAlign: 'center' }}>
+                  <div style={{ fontSize: 'clamp(1.25rem, 3vw, 1.75rem)', fontWeight: 700, color: '#dce0e8' }}>{books.length}</div>
+                  <div style={{ fontSize: '0.6rem', color: '#636d82', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 4, fontWeight: 600 }}>Shelf Items</div>
                 </div>
+                <div className="surface" style={{ padding: '1.25rem', textAlign: 'center' }}>
+                  <div style={{ fontSize: 'clamp(1.25rem, 3vw, 1.75rem)', fontWeight: 700, color: '#818cf8' }}>{totalRead}</div>
+                  <div style={{ fontSize: '0.6rem', color: '#636d82', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 4, fontWeight: 600 }}>Completed</div>
+                </div>
+                <div className="surface" style={{ padding: '1.25rem', textAlign: 'center' }}>
+                  <div style={{ fontSize: 'clamp(1.25rem, 3vw, 1.75rem)', fontWeight: 700, color: '#fbbf24' }}>{avgRating}★</div>
+                  <div style={{ fontSize: '0.6rem', color: '#636d82', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 4, fontWeight: 600 }}>Avg Rating</div>
+                </div>
+              </div>
+            </section>
 
-                <div className="flex items-center gap-2 w-full sm:w-auto">
-                  {/* Genre Select */}
-                  <div className="flex items-center gap-1.5 flex-1 sm:flex-initial">
-                    <Filter size={12} className="text-gray-500 shrink-0" />
-                    <select
-                      value={selectedGenre}
-                      onChange={(e) => setSelectedGenre(e.target.value)}
-                      className="input-dark py-2 px-3 text-xs w-full sm:w-32 cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap"
-                    >
-                      {availableGenres.map((g) => (
-                        <option key={g} value={g} className="bg-black">{g}</option>
-                      ))}
-                    </select>
+            {/* ── Visual Divider ── */}
+            <div style={{ height: 1, background: 'linear-gradient(90deg, transparent, rgba(99,102,241,0.15), transparent)', marginBottom: '2.5rem' }} />
+
+            {/* ── SECTION 4: Filter & Control Bar ── */}
+            <section style={{ 
+              marginBottom: '3rem', padding: '1.25rem 1.5rem',
+              background: 'rgba(22, 26, 36, 0.5)', backdropFilter: 'blur(12px)',
+              border: '1px solid rgba(255,255,255,0.04)', borderRadius: '1rem',
+              position: 'sticky', top: 0, zIndex: 20
+            }}>
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                
+                {/* Left Side: Search & Filter dropdowns */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1 w-full">
+                  {/* Search Box */}
+                  <div className="relative flex-1 min-w-0 sm:max-w-xs">
+                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#636d82' }} />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search title, author..."
+                      className="input-dark w-full"
+                      style={{ paddingLeft: '2.25rem', fontSize: '0.8rem', padding: '0.55rem 0.85rem 0.55rem 2.25rem' }}
+                    />
                   </div>
 
-                  {/* Status Select */}
-                  <div className="flex items-center gap-1.5 flex-1 sm:flex-initial">
-                    <BookMarked size={12} className="text-gray-500 shrink-0" />
-                    <select
-                      value={selectedStatus}
-                      onChange={(e) => setSelectedStatus(e.target.value)}
-                      className="input-dark py-2 px-3 text-xs w-full sm:w-32 cursor-pointer"
-                    >
-                      <option value="All" className="bg-black">All Status</option>
-                      <option value="completed" className="bg-black">Completed</option>
-                      <option value="reading" className="bg-black">Reading</option>
-                      <option value="to-read" className="bg-black">To Read</option>
-                    </select>
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                    {/* Genre Select */}
+                    <div className="flex items-center gap-1.5 flex-1 sm:flex-initial">
+                      <Filter size={12} style={{ color: '#636d82', flexShrink: 0 }} />
+                      <select
+                        value={selectedGenre}
+                        onChange={(e) => setSelectedGenre(e.target.value)}
+                        className="input-dark cursor-pointer"
+                        style={{ padding: '0.55rem 0.75rem', fontSize: '0.8rem' }}
+                      >
+                        {availableGenres.map((g) => (
+                          <option key={g} value={g} style={{ background: '#10131a' }}>{g}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Status Select */}
+                    <div className="flex items-center gap-1.5 flex-1 sm:flex-initial">
+                      <BookMarked size={12} style={{ color: '#636d82', flexShrink: 0 }} />
+                      <select
+                        value={selectedStatus}
+                        onChange={(e) => setSelectedStatus(e.target.value)}
+                        className="input-dark cursor-pointer"
+                        style={{ padding: '0.55rem 0.75rem', fontSize: '0.8rem' }}
+                      >
+                        <option value="All" style={{ background: '#10131a' }}>All Status</option>
+                        <option value="completed" style={{ background: '#10131a' }}>Completed</option>
+                        <option value="reading" style={{ background: '#10131a' }}>Reading</option>
+                        <option value="to-read" style={{ background: '#10131a' }}>To Read</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Right Side: Add Button & Reset */}
-              <div className="flex items-center gap-2 w-full md:w-auto justify-end">
-                <button
-                  onClick={handleResetDefaults}
-                  className="p-2 rounded-full border border-base-700 hover:border-gray-500 hover:bg-base-800 text-gray-400 hover:text-white transition-colors"
-                  title="Reset list to sample defaults"
-                >
-                  <RotateCcw size={14} />
-                </button>
-                <button
-                  onClick={() => {
-                    setBookToEdit(null);
-                    setIsModalOpen(true);
-                  }}
-                  className="btn-primary py-2 px-5 text-xs flex items-center gap-1.5 flex-1 sm:flex-initial justify-center"
-                >
-                  <Plus size={14} />
-                  Add Book
-                </button>
-              </div>
-
-            </div>
-
-            {/* Books Grid */}
-            {filteredBooks.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {filteredBooks.map((book, index) => (
-                  <BookCard
-                    key={book.id}
-                    book={book}
-                    delay={index}
-                    onOpenDetails={(b) => {
-                      setSelectedBook(b);
-                      setIsDetailsOpen(true);
+                {/* Right Side: Add Button & Reset */}
+                <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+                  <button
+                    onClick={handleResetDefaults}
+                    style={{ 
+                      padding: 8, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.06)',
+                      background: 'transparent', color: '#636d82', cursor: 'pointer',
+                      transition: 'all 0.2s ease'
                     }}
-                    onOpenEdit={(b) => {
-                      setBookToEdit(b);
-                      setIsModalOpen(true);
-                    }}
-                    onDelete={handleDeleteBook}
-                  />
-                ))}
-              </div>
-            ) : (
-              /* Empty Search Results / Collection state */
-              <div className="surface p-12 text-center max-w-md mx-auto space-y-4">
-                <div className="w-12 h-12 rounded-2xl bg-neutral-900 flex items-center justify-center text-gray-500 mx-auto">
-                  <BookOpen size={24} />
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-300">No books found</h3>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Try adjusting your search queries, clearing your filters, or adding a new book to the shelf.
-                  </p>
-                </div>
-                {(searchQuery || selectedGenre !== "All" || selectedStatus !== "All") && (
+                    title="Reset list to sample defaults"
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; e.currentTarget.style.color = '#dce0e8'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = '#636d82'; }}
+                  >
+                    <RotateCcw size={14} />
+                  </button>
                   <button
                     onClick={() => {
-                      setSearchQuery("");
-                      setSelectedGenre("All");
-                      setSelectedStatus("All");
+                      setBookToEdit(null);
+                      setIsModalOpen(true);
                     }}
-                    className="btn-ghost py-1.5 px-4 text-xs"
+                    className="btn-primary flex items-center gap-1.5 justify-center"
+                    style={{ padding: '0.55rem 1.25rem', fontSize: '0.8rem' }}
                   >
-                    Clear Filters
+                    <Plus size={14} />
+                    Add Book
                   </button>
-                )}
+                </div>
+
               </div>
-            )}
+            </section>
+
+            {/* ── SECTION 5: Books Grid ── */}
+            <section>
+              {filteredBooks.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                  {filteredBooks.map((book, index) => (
+                    <BookCard
+                      key={book.id}
+                      book={book}
+                      delay={index}
+                      onOpenDetails={(b) => {
+                        setSelectedBook(b);
+                        setIsDetailsOpen(true);
+                      }}
+                      onOpenEdit={(b) => {
+                        setBookToEdit(b);
+                        setIsModalOpen(true);
+                      }}
+                      onDelete={handleDeleteBook}
+                    />
+                  ))}
+                </div>
+              ) : (
+                /* Empty Search Results / Collection state */
+                <div className="surface" style={{ padding: '3rem 2rem', textAlign: 'center', maxWidth: 440, margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+                  <div style={{ 
+                    width: 56, height: 56, borderRadius: 16, 
+                    background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.1)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#636d82'
+                  }}>
+                    <BookOpen size={24} />
+                  </div>
+                  <div>
+                    <h3 style={{ fontSize: '0.9rem', fontWeight: 600, color: '#b8bfcc' }}>No books found</h3>
+                    <p style={{ fontSize: '0.75rem', color: '#636d82', marginTop: 4 }}>
+                      Try adjusting your search queries, clearing your filters, or adding a new book to the shelf.
+                    </p>
+                  </div>
+                  {(searchQuery || selectedGenre !== "All" || selectedStatus !== "All") && (
+                    <button
+                      onClick={() => {
+                        setSearchQuery("");
+                        setSelectedGenre("All");
+                        setSelectedStatus("All");
+                      }}
+                      className="btn-ghost" style={{ padding: '0.4rem 1rem', fontSize: '0.75rem' }}
+                    >
+                      Clear Filters
+                    </button>
+                  )}
+                </div>
+              )}
+            </section>
+
+            {/* ── Visual Divider ── */}
+            <div style={{ height: 1, background: 'linear-gradient(90deg, transparent, rgba(99,102,241,0.15), transparent)', marginTop: '4rem', marginBottom: '3rem' }} />
+
+            {/* ── SECTION 5.5: Upcoming Books Grid ── */}
+            <section style={{ marginBottom: '4rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem', justifyContent: 'space-between' }}>
+                <div>
+                  <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#f0f1f5', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Sparkles size={16} className="text-indigo-400" />
+                    Upcoming New Book Collection
+                  </h2>
+                  <p style={{ fontSize: '0.75rem', color: '#636d82', marginTop: 2 }}>Curated queue of books to read next</p>
+                </div>
+                <div style={{ fontSize: '0.7rem', color: '#636d82', background: 'rgba(99, 102, 241, 0.05)', padding: '0.35rem 0.75rem', borderRadius: '0.5rem', border: '1px solid rgba(99, 102, 241, 0.1)', fontWeight: 500 }}>
+                  <span style={{ fontWeight: 700, color: '#818cf8' }}>{filteredUpcoming.length}</span> {filteredUpcoming.length === 1 ? 'book' : 'books'} queued
+                </div>
+              </div>
+
+              {filteredUpcoming.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                  {filteredUpcoming.map((book) => (
+                    <div
+                      key={book.id}
+                      className="card group relative"
+                      style={{
+                        padding: '1.25rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '1rem',
+                        background: 'rgba(22, 26, 36, 0.4)',
+                        border: '1px dashed rgba(99, 102, 241, 0.2)',
+                        borderRadius: '1rem',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                      }}
+                    >
+                      {/* Top row: Genre and Status */}
+                      <div className="flex items-center justify-between">
+                        <span style={{
+                          fontSize: '0.6rem', textTransform: 'uppercase', fontWeight: 700,
+                          letterSpacing: '0.08em', color: '#818cf8',
+                          background: 'rgba(99, 102, 241, 0.08)', padding: '0.2rem 0.5rem',
+                          borderRadius: 6, border: '1px solid rgba(99, 102, 241, 0.1)'
+                        }}>
+                          {book.genre}
+                        </span>
+                        <span style={{
+                          fontSize: '0.6rem', fontWeight: 600,
+                          color: '#b8bfcc', background: 'rgba(255, 255, 255, 0.05)',
+                          padding: '0.2rem 0.5rem', borderRadius: 6
+                        }}>
+                          Upcoming
+                        </span>
+                      </div>
+
+                      {/* Main Info */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', flex: 1 }}>
+                        <h3 style={{ 
+                          fontSize: '0.85rem', fontWeight: 600, color: '#dce0e8', 
+                          lineHeight: 1.4,
+                          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden'
+                        }}>
+                          {book.title}
+                        </h3>
+                        <p style={{ fontSize: '0.75rem', color: '#636d82' }}>by {book.author}</p>
+                      </div>
+
+                      {/* Action Row */}
+                      <div className="flex items-center justify-between pt-3 border-t border-base-800 mt-1" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          onClick={() => handleAddUpcomingToShelf(book)}
+                          className="flex items-center gap-1 text-[11px] font-semibold text-indigo-400 hover:text-indigo-300 transition-colors"
+                          style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}
+                        >
+                          <Plus size={12} /> Add to Shelf
+                        </button>
+                        <button
+                          onClick={() => handleDeleteUpcomingBook(book.id)}
+                          className="text-gray-500 hover:text-red-400 transition-colors"
+                          style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 4 }}
+                          title="Remove from Upcoming"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="surface" style={{ padding: '2.5rem 2rem', textAlign: 'center', maxWidth: 440, margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+                  <p style={{ fontSize: '0.75rem', color: '#636d82' }}>No upcoming books found.</p>
+                </div>
+              )}
+            </section>
 
           </div>
         )}
 
-        {/* Footer */}
-        <footer className="mt-24 border-t border-base-800 pt-6 pb-4 flex flex-col sm:flex-row items-center justify-between text-[10px] text-gray-600 gap-4">
+        {/* ═══════════════════════════════════════════════════ */}
+        {/* SECTION 6: Footer                                  */}
+        {/* ═══════════════════════════════════════════════════ */}
+        <footer style={{ 
+          marginTop: '5rem', paddingTop: '1.5rem', paddingBottom: '1rem',
+          borderTop: '1px solid rgba(255,255,255,0.04)',
+          display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between',
+          fontSize: '0.65rem', color: '#49516a', gap: '1rem'
+        }}>
           <div>
             Built with Next.js App Router · Tailwind CSS v4 · Minimal Dark Theme
           </div>
