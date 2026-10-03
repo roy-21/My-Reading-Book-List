@@ -390,5 +390,19 @@ export const defaultBooks = [
     takeaway: "",
     quote: "",
     coverGradient: "from-slate-900 to-blue-950",
+  },
+  {
+    id: "29",
+    title: "SQL for Data Analysis",
+    author: "Cathy Tanimura",
+    genre: "Technology",
+    status: "to-read",
+    rating: 5,
+    startYear: 2026,
+    startMonth: "October",
+    review: "",
+    takeaway: "",
+    quote: "",
+    coverGradient: "from-slate-900 to-indigo-950",
   }
 ];
