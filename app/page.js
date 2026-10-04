@@ -673,16 +673,13 @@ export default function Home() {
         {/* SECTION 6: Footer                                  */}
         {/* ═══════════════════════════════════════════════════ */}
         <footer style={{ 
-          marginTop: '5rem', paddingTop: '1.5rem', paddingBottom: '1rem',
+          marginTop: '5rem', paddingTop: '1.5rem', paddingBottom: '2rem',
           borderTop: '1px solid var(--border-color)',
-          display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between',
-          fontSize: '0.65rem', color: 'var(--text-muted)', gap: '1rem'
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: '0.85rem', fontWeight: 500, color: 'var(--text-muted)', textAlign: 'center'
         }}>
           <div>
-            Built with Next.js App Router · Tailwind CSS v4 · Minimal Dark Theme
-          </div>
-          <div>
-            &copy; {new Date().getFullYear()} My Reading List Portfolio. All rights reserved.
+            Built with <span style={{ color: 'var(--text-main)', fontWeight: 600 }}>Sojib</span>
           </div>
         </footer>
 
