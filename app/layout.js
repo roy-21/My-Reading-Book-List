@@ -1,13 +1,6 @@
-import { Outfit } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
-
-const outfit = Outfit({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
-  display: "swap",
-});
 
 export const metadata = {
   title: "My Reading List — A Curated Book Collection",
@@ -24,7 +17,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={outfit.className}>
+    <html lang="en">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#0c0e14" />
