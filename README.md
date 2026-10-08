@@ -79,3 +79,8 @@ my-reading-list/
 ---
 
 *Built with ❤️ using Next.js & Tailwind CSS v4*
+
+---
+
+Sojib Roy
+
