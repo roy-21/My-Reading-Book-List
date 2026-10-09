@@ -3,13 +3,14 @@ import { useState, useEffect } from "react";
 import { 
   BookOpen, Sparkles, BarChart3, Star, BookMarked, 
   Search, Plus, Filter, RotateCcw, Quote as QuoteIcon, Library, Trash2,
-  Sun, Moon
+  Sun, Moon, Lock, Unlock, ShieldCheck
 } from "lucide-react";
 import { defaultBooks } from "@/data/defaultBooks";
 import { upcomingBooks } from "@/data/upcomingBooks";
 import BookCard from "@/components/BookCard";
 import BookModal from "@/components/BookModal";
 import BookDetailsModal from "@/components/BookDetailsModal";
+import AdminModal from "@/components/AdminModal";
 import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 import { useTheme } from "@/components/ThemeProvider";
 
@@ -38,6 +39,10 @@ export default function Home() {
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [bookToEdit, setBookToEdit] = useState(null);
+
+  // Admin Authentication State
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
 
   // Quote Spotlight State
   const [spotlightBook, setSpotlightBook] = useState(null);
@@ -83,6 +88,12 @@ export default function Home() {
     } else {
       setUpcomingList(upcomingBooks);
       localStorage.setItem("my_reading_list_upcoming", JSON.stringify(upcomingBooks));
+    }
+
+    // Load Admin session
+    const storedAuth = localStorage.getItem("my_reading_list_admin_auth");
+    if (storedAuth === "true") {
+      setIsAdmin(true);
     }
 
     setIsLoaded(true);
@@ -165,7 +176,26 @@ export default function Home() {
     }
   };
 
+  const handleAdminAuthenticate = (pinInput) => {
+    const secretPin = process.env.NEXT_PUBLIC_ADMIN_PIN || "1234";
+    if (pinInput === secretPin) {
+      setIsAdmin(true);
+      localStorage.setItem("my_reading_list_admin_auth", "true");
+      return true;
+    }
+    return false;
+  };
+
+  const handleAdminLogout = () => {
+    setIsAdmin(false);
+    localStorage.removeItem("my_reading_list_admin_auth");
+  };
+
   const handleAddUpcomingToShelf = (upcomingBook) => {
+    if (!isAdmin) {
+      setIsAdminModalOpen(true);
+      return;
+    }
     setBookToEdit({
       title: upcomingBook.title,
       author: upcomingBook.author,
@@ -331,6 +361,32 @@ export default function Home() {
               Analytics Dashboard
             </button>
 
+            {/* Admin Authentication Button */}
+            <button
+              onClick={() => setIsAdminModalOpen(true)}
+              className="btn-ghost flex items-center justify-center cursor-pointer transition-transform duration-300 hover:scale-105 active:scale-95 text-xs gap-1.5"
+              style={{
+                padding: "0.45rem 0.85rem",
+                borderRadius: "0.75rem",
+                border: isAdmin ? "1px solid rgba(16, 185, 129, 0.3)" : "1px solid var(--border-btn-ghost)",
+                background: isAdmin ? "rgba(16, 185, 129, 0.1)" : "transparent",
+                color: isAdmin ? "#10b981" : "var(--text-main)",
+              }}
+              title={isAdmin ? "Admin Mode Unlocked (Click to manage)" : "Unlock Admin Controls"}
+            >
+              {isAdmin ? (
+                <>
+                  <ShieldCheck size={14} className="text-emerald-400" />
+                  <span style={{ fontWeight: 600 }}>Admin Active</span>
+                </>
+              ) : (
+                <>
+                  <Lock size={14} className="text-indigo-400" />
+                  <span>Admin</span>
+                </>
+              )}
+            </button>
+
             {/* Theme Toggle Button */}
             <button
               onClick={toggleTheme}
@@ -489,29 +545,35 @@ export default function Home() {
  
                 {/* Right Side: Add Button & Reset */}
                 <div className="flex items-center gap-2 w-full md:w-auto justify-end">
-                  <button
-                    onClick={handleResetDefaults}
-                    style={{ 
-                      padding: 8, borderRadius: '50%', border: '1px solid var(--border-color)',
-                      background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer',
-                      transition: 'all 0.2s ease'
-                    }}
-                    title="Reset list to sample defaults"
-                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(99, 102, 241, 0.25)'; e.currentTarget.style.color = 'var(--text-highlight)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-color)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
-                  >
-                    <RotateCcw size={14} />
-                  </button>
+                  {isAdmin && (
+                    <button
+                      onClick={handleResetDefaults}
+                      style={{ 
+                        padding: 8, borderRadius: '50%', border: '1px solid var(--border-color)',
+                        background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer',
+                        transition: 'all 0.2s ease'
+                      }}
+                      title="Reset list to sample defaults"
+                      onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(99, 102, 241, 0.25)'; e.currentTarget.style.color = 'var(--text-highlight)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-color)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
+                    >
+                      <RotateCcw size={14} />
+                    </button>
+                  )}
                   <button
                     onClick={() => {
-                      setBookToEdit(null);
-                      setIsModalOpen(true);
+                      if (!isAdmin) {
+                        setIsAdminModalOpen(true);
+                      } else {
+                        setBookToEdit(null);
+                        setIsModalOpen(true);
+                      }
                     }}
                     className="btn-primary flex items-center gap-1.5 justify-center"
                     style={{ padding: '0.55rem 1.25rem', fontSize: '0.8rem' }}
                   >
-                    <Plus size={14} />
-                    Add Book
+                    {isAdmin ? <Plus size={14} /> : <Lock size={14} />}
+                    {isAdmin ? "Add Book" : "Add Book (Admin)"}
                   </button>
                 </div>
 
@@ -527,11 +589,16 @@ export default function Home() {
                       key={book.id}
                       book={book}
                       delay={index}
+                      isAdmin={isAdmin}
                       onOpenDetails={(b) => {
                         setSelectedBook(b);
                         setIsDetailsOpen(true);
                       }}
                       onOpenEdit={(b) => {
+                        if (!isAdmin) {
+                          setIsAdminModalOpen(true);
+                          return;
+                        }
                         setBookToEdit(b);
                         setIsModalOpen(true);
                       }}
@@ -647,14 +714,16 @@ export default function Home() {
                         >
                           <Plus size={12} /> Add to Shelf
                         </button>
-                        <button
-                          onClick={() => handleDeleteUpcomingBook(book.id)}
-                          className="text-gray-500 hover:text-red-400 transition-colors"
-                          style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 4 }}
-                          title="Remove from Upcoming"
-                        >
-                          <Trash2 size={12} />
-                        </button>
+                        {isAdmin && (
+                          <button
+                            onClick={() => handleDeleteUpcomingBook(book.id)}
+                            className="text-gray-500 hover:text-red-400 transition-colors"
+                            style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 4 }}
+                            title="Remove from Upcoming"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -704,11 +773,25 @@ export default function Home() {
           setSelectedBook(null);
         }}
         book={selectedBook}
+        isAdmin={isAdmin}
         onOpenEdit={(b) => {
+          if (!isAdmin) {
+            setIsAdminModalOpen(true);
+            return;
+          }
           setBookToEdit(b);
           setIsModalOpen(true);
         }}
         onDelete={handleDeleteBook}
+      />
+
+      {/* Admin Authentication Modal */}
+      <AdminModal
+        isOpen={isAdminModalOpen}
+        onClose={() => setIsAdminModalOpen(false)}
+        onAuthenticate={handleAdminAuthenticate}
+        isAdmin={isAdmin}
+        onLogout={handleAdminLogout}
       />
 
     </main>

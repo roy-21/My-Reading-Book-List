@@ -21,7 +21,7 @@ function StarRating({ rating }) {
   );
 }
 
-export default function BookCard({ book, onOpenDetails, onOpenEdit, onDelete, delay }) {
+export default function BookCard({ book, onOpenDetails, onOpenEdit, onDelete, delay, isAdmin }) {
   const status = STATUS_MAP[book.status] || STATUS_MAP["to-read"];
 
   return (
@@ -70,42 +70,44 @@ export default function BookCard({ book, onOpenDetails, onOpenEdit, onDelete, de
 
       {/* Footer Row */}
       <div style={{
-        display: 'flex', alignItems: 'center', justifycontent: 'space-between',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         paddingTop: '0.75rem', borderTop: '1px solid var(--border-color)', marginTop: '0.25rem'
       }}>
         <span className={status.cls}>{status.label}</span>
         <StarRating rating={book.rating} />
       </div>
 
-      {/* Hover Actions in Top Right */}
-      <div className="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20" onClick={(e) => e.stopPropagation()}>
-        <button
-          onClick={() => onOpenEdit(book)}
-          style={{
-            padding: 4, borderRadius: 6, 
-            background: 'var(--bg-input)', border: '1px solid var(--border-color)',
-            color: 'var(--text-btn-ghost)', cursor: 'pointer', transition: 'all 0.2s ease'
-          }}
-          onMouseEnter={(e) => { e.currentTarget.style.background = '#6366f1'; e.currentTarget.style.color = '#fff'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--bg-input)'; e.currentTarget.style.color = 'var(--text-btn-ghost)'; }}
-          title="Edit Book"
-        >
-          <Edit3 size={11} />
-        </button>
-        <button
-          onClick={() => onDelete(book.id)}
-          style={{
-            padding: 4, borderRadius: 6,
-            background: 'var(--bg-input)', border: '1px solid var(--border-color)',
-            color: 'var(--text-btn-ghost)', cursor: 'pointer', transition: 'all 0.2s ease'
-          }}
-          onMouseEnter={(e) => { e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.color = '#fff'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--bg-input)'; e.currentTarget.style.color = 'var(--text-btn-ghost)'; }}
-          title="Delete Book"
-        >
-          <Trash2 size={11} />
-        </button>
-      </div>
+      {/* Hover Actions in Top Right - Admin Only */}
+      {isAdmin && (
+        <div className="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20" onClick={(e) => e.stopPropagation()}>
+          <button
+            onClick={() => onOpenEdit(book)}
+            style={{
+              padding: 4, borderRadius: 6, 
+              background: 'var(--bg-input)', border: '1px solid var(--border-color)',
+              color: 'var(--text-btn-ghost)', cursor: 'pointer', transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = '#6366f1'; e.currentTarget.style.color = '#fff'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--bg-input)'; e.currentTarget.style.color = 'var(--text-btn-ghost)'; }}
+            title="Edit Book"
+          >
+            <Edit3 size={11} />
+          </button>
+          <button
+            onClick={() => onDelete(book.id)}
+            style={{
+              padding: 4, borderRadius: 6,
+              background: 'var(--bg-input)', border: '1px solid var(--border-color)',
+              color: 'var(--text-btn-ghost)', cursor: 'pointer', transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.color = '#fff'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--bg-input)'; e.currentTarget.style.color = 'var(--text-btn-ghost)'; }}
+            title="Delete Book"
+          >
+            <Trash2 size={11} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

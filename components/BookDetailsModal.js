@@ -7,7 +7,7 @@ const STATUS_MAP = {
   "to-read": { label: "To Read",   cls: "badge badge-to-read" },
 };
 
-export default function BookDetailsModal({ isOpen, onClose, book, onOpenEdit, onDelete }) {
+export default function BookDetailsModal({ isOpen, onClose, book, onOpenEdit, onDelete, isAdmin }) {
   if (!isOpen || !book) return null;
 
   const status = STATUS_MAP[book.status] || STATUS_MAP["to-read"];
@@ -122,25 +122,31 @@ export default function BookDetailsModal({ isOpen, onClose, book, onOpenEdit, on
           gap: '0.75rem', padding: '1.25rem 1.5rem',
           borderTop: '1px solid var(--border-color)', background: 'var(--bg-card-upcoming)'
         }}>
-          <div style={{ display: 'flex', gap: '0.5rem', flex: '1 1 auto' }}>
-            <button
-              onClick={() => { onOpenEdit(book); onClose(); }}
-              className="btn-ghost flex items-center gap-1.5 justify-center"
-              style={{ padding: '0.4rem 0.75rem', fontSize: '0.75rem', flex: '1 1 0', maxWidth: 120 }}
-            >
-              <Edit3 size={11} /> Edit
-            </button>
-            <button
-              onClick={() => { if (confirm("Delete this book?")) { onDelete(book.id); onClose(); } }}
-              className="btn-ghost flex items-center gap-1.5 justify-center"
-              style={{ 
-                padding: '0.4rem 0.75rem', fontSize: '0.75rem', flex: '1 1 0', maxWidth: 120,
-                borderColor: 'rgba(239, 68, 68, 0.15)', color: '#fb7185'
-              }}
-            >
-              <Trash2 size={11} /> Delete
-            </button>
-          </div>
+          {isAdmin ? (
+            <div style={{ display: 'flex', gap: '0.5rem', flex: '1 1 auto' }}>
+              <button
+                onClick={() => { onOpenEdit(book); onClose(); }}
+                className="btn-ghost flex items-center gap-1.5 justify-center"
+                style={{ padding: '0.4rem 0.75rem', fontSize: '0.75rem', flex: '1 1 0', maxWidth: 120 }}
+              >
+                <Edit3 size={11} /> Edit
+              </button>
+              <button
+                onClick={() => { if (confirm("Delete this book?")) { onDelete(book.id); onClose(); } }}
+                className="btn-ghost flex items-center gap-1.5 justify-center"
+                style={{ 
+                  padding: '0.4rem 0.75rem', fontSize: '0.75rem', flex: '1 1 0', maxWidth: 120,
+                  borderColor: 'rgba(239, 68, 68, 0.15)', color: '#fb7185'
+                }}
+              >
+                <Trash2 size={11} /> Delete
+              </button>
+            </div>
+          ) : (
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+              Read-Only View
+            </div>
+          )}
           <button onClick={onClose} className="btn-primary" style={{ padding: '0.4rem 1.25rem', fontSize: '0.75rem' }}>Close</button>
         </div>
       </div>
