@@ -176,9 +176,10 @@ export default function Home() {
     }
   };
 
-  const handleAdminAuthenticate = (pinInput) => {
-    const secretPin = process.env.NEXT_PUBLIC_ADMIN_PIN || "1234";
-    if (pinInput === secretPin) {
+  const handleAdminAuthenticate = ({ username, password }) => {
+    const adminUsername = process.env.NEXT_PUBLIC_ADMIN_USERNAME || "ROy";
+    const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || "sojib215@#";
+    if (username === adminUsername && password === adminPassword) {
       setIsAdmin(true);
       localStorage.setItem("my_reading_list_admin_auth", "true");
       return true;

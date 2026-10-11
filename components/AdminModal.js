@@ -1,10 +1,11 @@
 "use client";
 import { useState } from "react";
-import { Lock, Unlock, X, KeyRound, Eye, EyeOff, ShieldCheck, AlertCircle } from "lucide-react";
+import { Lock, Unlock, X, KeyRound, User, Eye, EyeOff, ShieldCheck, AlertCircle } from "lucide-react";
 
 export default function AdminModal({ isOpen, onClose, onAuthenticate, isAdmin, onLogout }) {
-  const [pin, setPin] = useState("");
-  const [showPin, setShowPin] = useState(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
@@ -15,21 +16,26 @@ export default function AdminModal({ isOpen, onClose, onAuthenticate, isAdmin, o
     setError("");
     setSuccessMsg("");
 
-    if (!pin.trim()) {
-      setError("Please enter the Admin PIN or Password.");
+    if (!username.trim()) {
+      setError("Please enter the Admin Username.");
+      return;
+    }
+    if (!password.trim()) {
+      setError("Please enter the Admin Password.");
       return;
     }
 
-    const isSuccess = onAuthenticate(pin.trim());
+    const isSuccess = onAuthenticate({ username: username.trim(), password: password.trim() });
     if (isSuccess) {
       setSuccessMsg("Admin Mode Unlocked successfully!");
-      setPin("");
+      setUsername("");
+      setPassword("");
       setTimeout(() => {
         setSuccessMsg("");
         onClose();
       }, 900);
     } else {
-      setError("Incorrect Admin PIN! Please try again.");
+      setError("Incorrect Username or Password! Please try again.");
     }
   };
 
@@ -75,10 +81,10 @@ export default function AdminModal({ isOpen, onClose, onAuthenticate, isAdmin, o
             </div>
             <div>
               <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-main)' }}>
-                {isAdmin ? "Admin Controls Active" : "Admin Authentication"}
+                {isAdmin ? "Admin Controls Active" : "Admin Login"}
               </h3>
               <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 1 }}>
-                {isAdmin ? "You have full management access" : "Enter PIN to unlock edit controls"}
+                {isAdmin ? "You have full management access" : "Enter username & password to unlock"}
               </p>
             </div>
           </div>
@@ -123,32 +129,51 @@ export default function AdminModal({ isOpen, onClose, onAuthenticate, isAdmin, o
               </button>
             </div>
           ) : (
-            /* PIN Input Form */
+            /* Username + Password Login Form */
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {/* Username Field */}
               <div>
                 <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-main)', marginBottom: '0.4rem' }}>
-                  Admin Security PIN / Password
+                  Username
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <User size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Enter Admin Username"
+                    className="input-dark w-full"
+                    style={{ paddingLeft: '2.5rem', fontSize: '0.85rem' }}
+                    autoFocus
+                  />
+                </div>
+              </div>
+
+              {/* Password Field */}
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-main)', marginBottom: '0.4rem' }}>
+                  Password
                 </label>
                 <div style={{ position: 'relative' }}>
                   <KeyRound size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                   <input
-                    type={showPin ? "text" : "password"}
-                    value={pin}
-                    onChange={(e) => setPin(e.target.value)}
-                    placeholder="Enter Admin PIN (Default: 1234)"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter Admin Password"
                     className="input-dark w-full"
                     style={{ paddingLeft: '2.5rem', paddingRight: '2.5rem', fontSize: '0.85rem' }}
-                    autoFocus
                   />
                   <button
                     type="button"
-                    onClick={() => setShowPin(!showPin)}
+                    onClick={() => setShowPassword(!showPassword)}
                     style={{
                       position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
                       background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 4
                     }}
                   >
-                    {showPin ? <EyeOff size={15} /> : <Eye size={15} />}
+                    {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                   </button>
                 </div>
               </div>
@@ -176,7 +201,7 @@ export default function AdminModal({ isOpen, onClose, onAuthenticate, isAdmin, o
               )}
 
               <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', background: 'var(--bg-input)', padding: '0.6rem 0.85rem', borderRadius: 8, border: '1px solid var(--border-color)', lineHeight: 1.4 }}>
-                💡 <strong>Tip:</strong> Visitors on Vercel get Read-Only view. Only you with this Admin PIN can add, edit, or delete books.
+                💡 <strong>Tip:</strong> Visitors on Vercel get Read-Only view. Only you with the correct Admin credentials can add, edit, or delete books.
               </div>
 
               <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.25rem' }}>
