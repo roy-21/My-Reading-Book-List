@@ -3,14 +3,16 @@
 import { useState, useMemo } from "react";
 import {
   BookOpen, Search, Filter, Plus, BarChart3,
-  Sparkles, Shield, Bookmark, ChevronRight, CheckCircle2,
-  RefreshCw, RotateCcw, ArrowRight, Library
+  Sparkles, Shield, Bookmark, CheckCircle2,
+  RotateCcw, ArrowRight, Library, LayoutGrid,
+  LibraryBig, Download, ExternalLink
 } from "lucide-react";
 import BookCard from "@/components/BookCard";
 import BookModal from "@/components/BookModal";
 import BookDetailsModal from "@/components/BookDetailsModal";
 import AdminModal from "@/components/AdminModal";
 import AnalyticsDashboard from "@/components/AnalyticsDashboard";
+import SpineShelf from "@/components/SpineShelf";
 import { ThemeToggle } from "@/components/ThemeProvider";
 import {
   loginAction,
@@ -30,6 +32,7 @@ export default function ReadingRoomApp({ initialBooks = [], initialIsAdmin = fal
   const [selectedGenre, setSelectedGenre] = useState("All");
   const [selectedStatus, setSelectedStatus] = useState("All");
   const [activeTab, setActiveTab] = useState("shelf"); // "shelf" | "upcoming" | "analytics"
+  const [viewMode, setViewMode] = useState("shelf"); // "shelf" (Spine view) | "grid" (Card view)
 
   // Modals
   const [detailsBook, setDetailsBook] = useState(null);
@@ -73,7 +76,7 @@ export default function ReadingRoomApp({ initialBooks = [], initialIsAdmin = fal
     });
   }, [shelfBooks, searchQuery, selectedGenre, selectedStatus]);
 
-  // Featured Quote of the day (stable or picked from completed books with quotes)
+  // Featured Quote of the day
   const featuredQuote = useMemo(() => {
     const quotedBooks = shelfBooks.filter((b) => b.quote && b.quote.trim().length > 0);
     if (!quotedBooks.length) return null;
@@ -107,7 +110,6 @@ export default function ReadingRoomApp({ initialBooks = [], initialIsAdmin = fal
   const handleSaveBook = async (bookData) => {
     const res = await saveBookAction(bookData);
     if (res.success) {
-      // Optimistic state update
       setBooks((prev) => {
         const idx = prev.findIndex((b) => String(b.id) === String(res.book.id));
         if (idx >= 0) {
@@ -232,9 +234,19 @@ export default function ReadingRoomApp({ initialBooks = [], initialIsAdmin = fal
             </button>
           </nav>
 
-          {/* Top Actions: Theme, Admin & Add */}
+          {/* Top Actions: Theme, Export, Admin & Add */}
           <div className="flex items-center gap-2">
             <ThemeToggle />
+
+            {/* Export Dropdown Link */}
+            <a
+              href="/api/export?format=json"
+              download
+              title="Export Library (JSON)"
+              className="p-2 rounded-lg border border-color bg-surface text-muted hover:text-main hover:border-indigo-500/30 transition-all flex items-center justify-center text-xs"
+            >
+              <Download size={14} />
+            </a>
 
             {isAdmin && (
               <button
@@ -332,7 +344,7 @@ export default function ReadingRoomApp({ initialBooks = [], initialIsAdmin = fal
         {activeTab === "shelf" && (
           <div className="flex flex-col gap-6">
             
-            {/* Search and Filters Bar */}
+            {/* Search, Filters, and Shelf/Grid View Toggle */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
               
               {/* Search Box */}
@@ -356,8 +368,34 @@ export default function ReadingRoomApp({ initialBooks = [], initialIsAdmin = fal
                 )}
               </div>
 
-              {/* Filter Controls */}
+              {/* View Switcher & Filters */}
               <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
+                
+                {/* Shelf vs Grid Toggle */}
+                <div className="flex items-center bg-surface border border-color p-0.5 rounded-xl">
+                  <button
+                    onClick={() => setViewMode("shelf")}
+                    aria-label="Bookshelf View"
+                    title="Bookshelf Spine View"
+                    className={`p-1.5 rounded-lg text-xs transition-all ${
+                      viewMode === "shelf" ? "bg-indigo-600 text-white shadow-sm" : "text-muted hover:text-main"
+                    }`}
+                  >
+                    <LibraryBig size={14} />
+                  </button>
+                  <button
+                    onClick={() => setViewMode("grid")}
+                    aria-label="Grid View"
+                    title="Card Grid View"
+                    className={`p-1.5 rounded-lg text-xs transition-all ${
+                      viewMode === "grid" ? "bg-indigo-600 text-white shadow-sm" : "text-muted hover:text-main"
+                    }`}
+                  >
+                    <LayoutGrid size={14} />
+                  </button>
+                </div>
+
+                {/* Filter Controls */}
                 <div className="flex items-center gap-1.5 bg-surface border border-color px-2.5 py-1.5 rounded-xl text-xs text-muted">
                   <Filter size={12} className="text-indigo-400" />
                   <span className="font-semibold uppercase tracking-wider text-[0.62rem]">Status:</span>
@@ -390,7 +428,7 @@ export default function ReadingRoomApp({ initialBooks = [], initialIsAdmin = fal
               </div>
             </div>
 
-            {/* Results Count & Current Filter Indicators */}
+            {/* Results Count & Filter Reset */}
             <div className="flex items-center justify-between text-xs text-muted border-b border-color pb-2">
               <span>
                 Showing <strong className="text-main">{filteredShelfBooks.length}</strong> of {shelfBooks.length} volumes in The Stacks
@@ -409,23 +447,31 @@ export default function ReadingRoomApp({ initialBooks = [], initialIsAdmin = fal
               )}
             </div>
 
-            {/* Books Grid */}
+            {/* Books Presentation: Spine Shelf or Grid View */}
             {filteredShelfBooks.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
-                {filteredShelfBooks.map((book) => (
-                  <BookCard
-                    key={book.id}
-                    book={book}
-                    onOpenDetails={(b) => setDetailsBook(b)}
-                    onOpenEdit={(b) => {
-                      setBookToEdit(b);
-                      setIsBookModalOpen(true);
-                    }}
-                    onDelete={handleDeleteBook}
-                    isAdmin={isAdmin}
-                  />
-                ))}
-              </div>
+              viewMode === "shelf" ? (
+                <SpineShelf
+                  books={filteredShelfBooks}
+                  onSelectBook={(b) => setDetailsBook(b)}
+                  selectedGenre={selectedGenre}
+                />
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 animate-fade-in">
+                  {filteredShelfBooks.map((book) => (
+                    <BookCard
+                      key={book.id}
+                      book={book}
+                      onOpenDetails={(b) => setDetailsBook(b)}
+                      onOpenEdit={(b) => {
+                        setBookToEdit(b);
+                        setIsBookModalOpen(true);
+                      }}
+                      onDelete={handleDeleteBook}
+                      isAdmin={isAdmin}
+                    />
+                  ))}
+                </div>
+              )
             ) : (
               <div className="surface text-center py-16 px-4 rounded-2xl flex flex-col items-center gap-3">
                 <BookOpen size={32} className="text-muted opacity-40" />
@@ -536,13 +582,20 @@ export default function ReadingRoomApp({ initialBooks = [], initialIsAdmin = fal
             © {new Date().getFullYear()} Sojib&apos;s Reading Room. Handcrafted with Next.js &amp; Tailwind.
           </p>
           <div className="flex items-center gap-4">
+            <a
+              href="/api/export?format=csv"
+              download
+              className="hover:text-indigo-400 transition-colors flex items-center gap-1"
+            >
+              <Download size={11} /> Export CSV
+            </a>
             {isAdmin && (
               <button
                 onClick={handleResetDatabase}
                 className="hover:text-rose-400 transition-colors flex items-center gap-1"
                 title="Reset database to seed books"
               >
-                <RefreshCw size={11} /> Reset Seed Data
+                Reset Seed Data
               </button>
             )}
             <button
