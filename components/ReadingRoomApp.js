@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useMemo } from "react";
 
+import dynamic from "next/dynamic";
 import {
   BookOpen, Search, Filter, Plus, BarChart3,
   Sparkles, Shield, Bookmark, CheckCircle2,
   RotateCcw, ArrowRight, Library, LayoutGrid,
-  LibraryBig, Download, ExternalLink
+  LibraryBig, Download, ExternalLink, Box
 } from "lucide-react";
 import BookCard from "@/components/BookCard";
 import BookModal from "@/components/BookModal";
@@ -16,6 +17,17 @@ import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 import SpineShelf from "@/components/SpineShelf";
 import CommandPalette from "@/components/CommandPalette";
 import { ThemeToggle } from "@/components/ThemeProvider";
+
+const ReadingRoom3D = dynamic(() => import("@/components/ReadingRoom3D"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-[540px] rounded-2xl border border-color bg-slate-950 flex flex-col items-center justify-center gap-3 text-muted shadow-2xl">
+      <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+      <p className="text-xs font-medium">Entering 3D Library Room...</p>
+    </div>
+  ),
+});
+
 import {
   loginAction,
   logoutAction,
@@ -318,11 +330,21 @@ export default function ReadingRoomApp({ initialBooks = [], initialIsAdmin = fal
               >
                 &ldquo;{featuredQuote.quote}&rdquo;
               </blockquote>
-              <p className="text-xs text-muted">
-                — {featuredQuote.author}
-              </p>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mt-1">
+                <p className="text-xs text-muted">
+                  — {featuredQuote.author}
+                </p>
+                <button
+                  onClick={() => setViewMode("3d")}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-white bg-indigo-600/90 hover:bg-indigo-600 px-3 py-1.5 rounded-lg shadow-sm transition-all"
+                >
+                  <Box size={13} />
+                  <span>Enter 3D Reading Room</span>
+                </button>
+              </div>
             </div>
           </section>
+
         )}
 
         {/* Mobile Tab Navigation */}
@@ -394,7 +416,7 @@ export default function ReadingRoomApp({ initialBooks = [], initialIsAdmin = fal
               {/* View Switcher & Filters */}
               <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
                 
-                {/* Shelf vs Grid Toggle */}
+                {/* Shelf vs Grid vs 3D Room Toggle */}
                 <div className="flex items-center bg-surface border border-color p-0.5 rounded-xl">
                   <button
                     onClick={() => setViewMode("shelf")}
@@ -416,7 +438,19 @@ export default function ReadingRoomApp({ initialBooks = [], initialIsAdmin = fal
                   >
                     <LayoutGrid size={14} />
                   </button>
+                  <button
+                    onClick={() => setViewMode("3d")}
+                    aria-label="3D Reading Room"
+                    title="Enter 3D Library Room"
+                    className={`px-2 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1 ${
+                      viewMode === "3d" ? "bg-indigo-600 text-white shadow-sm" : "text-muted hover:text-main"
+                    }`}
+                  >
+                    <Box size={14} />
+                    <span className="font-bold text-[0.68rem]">3D</span>
+                  </button>
                 </div>
+
 
                 {/* Filter Controls */}
                 <div className="flex items-center gap-1.5 bg-surface border border-color px-2.5 py-1.5 rounded-xl text-xs text-muted">
@@ -470,9 +504,15 @@ export default function ReadingRoomApp({ initialBooks = [], initialIsAdmin = fal
               )}
             </div>
 
-            {/* Books Presentation: Spine Shelf or Grid View */}
+            {/* Books Presentation: 3D Room, Spine Shelf or Grid View */}
             {filteredShelfBooks.length > 0 ? (
-              viewMode === "shelf" ? (
+              viewMode === "3d" ? (
+                <ReadingRoom3D
+                  books={filteredShelfBooks}
+                  onSelectBook={(b) => setDetailsBook(b)}
+                  onClose={() => setViewMode("shelf")}
+                />
+              ) : viewMode === "shelf" ? (
                 <SpineShelf
                   books={filteredShelfBooks}
                   onSelectBook={(b) => setDetailsBook(b)}
@@ -480,6 +520,7 @@ export default function ReadingRoomApp({ initialBooks = [], initialIsAdmin = fal
                 />
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 animate-fade-in">
+
                   {filteredShelfBooks.map((book) => (
                     <BookCard
                       key={book.id}
