@@ -1,6 +1,6 @@
 "use client";
-import { useState } from "react";
-import { Lock, Unlock, X, KeyRound, User, Eye, EyeOff, ShieldCheck, AlertCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Lock, Unlock, X, KeyRound, User, Eye, EyeOff, ShieldCheck, AlertCircle, Loader2 } from "lucide-react";
 
 export default function AdminModal({ isOpen, onClose, onAuthenticate, isAdmin, onLogout }) {
   const [username, setUsername] = useState("");
@@ -8,10 +8,21 @@ export default function AdminModal({ isOpen, onClose, onAuthenticate, isAdmin, o
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Close on Escape key
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setSuccessMsg("");
@@ -25,32 +36,50 @@ export default function AdminModal({ isOpen, onClose, onAuthenticate, isAdmin, o
       return;
     }
 
-    const isSuccess = onAuthenticate({ username: username.trim(), password: password.trim() });
-    if (isSuccess) {
-      setSuccessMsg("Admin Mode Unlocked successfully!");
-      setUsername("");
-      setPassword("");
-      setTimeout(() => {
-        setSuccessMsg("");
-        onClose();
-      }, 900);
-    } else {
-      setError("Incorrect Username or Password! Please try again.");
+    try {
+      setIsSubmitting(true);
+      const res = await onAuthenticate({ username: username.trim(), password: password.trim() });
+      if (res && res.success !== false) {
+        setSuccessMsg("Admin Session Verified Successfully!");
+        setUsername("");
+        setPassword("");
+        setTimeout(() => {
+          setSuccessMsg("");
+          onClose();
+        }, 800);
+      } else {
+        setError(res?.error || "Incorrect Username or Password! Please try again.");
+      }
+    } catch {
+      setError("Authentication failed. Please check server connection.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleLogout = () => {
-    onLogout();
-    onClose();
+  const handleLogout = async () => {
+    setIsSubmitting(true);
+    try {
+      await onLogout();
+      onClose();
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 100,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(10px)',
-      padding: '1rem'
-    }}>
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="admin-dialog-title"
+      onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 100,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(10px)',
+        padding: '1rem'
+      }}
+    >
       <div
         style={{
           width: '100%', maxWidth: 420,
@@ -80,16 +109,17 @@ export default function AdminModal({ isOpen, onClose, onAuthenticate, isAdmin, o
               {isAdmin ? <ShieldCheck size={18} /> : <Lock size={18} />}
             </div>
             <div>
-              <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-main)' }}>
+              <h3 id="admin-dialog-title" style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-main)' }}>
                 {isAdmin ? "Admin Controls Active" : "Admin Login"}
               </h3>
               <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 1 }}>
-                {isAdmin ? "You have full management access" : "Enter username & password to unlock"}
+                {isAdmin ? "Server session verified with management access" : "Enter username & password to unlock"}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
+            aria-label="Close dialog"
             style={{
               padding: 6, borderRadius: 8,
               background: 'transparent', color: 'var(--text-muted)',
@@ -112,20 +142,21 @@ export default function AdminModal({ isOpen, onClose, onAuthenticate, isAdmin, o
                 display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center'
               }}>
                 <ShieldCheck size={16} />
-                <span>Admin Mode is currently <strong>UNLOCKED</strong> on this browser.</span>
+                <span>Admin Mode is currently <strong>AUTHENTICATED</strong>.</span>
               </div>
               <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
-                You can add, edit, modify, and delete books across your reading list. Lock admin mode when using a public device.
+                You can add, edit, modify, and delete books across your reading list. Changes are securely saved to the persistent database.
               </p>
               <button
                 onClick={handleLogout}
+                disabled={isSubmitting}
                 className="btn-ghost flex items-center justify-center gap-2"
                 style={{
                   width: '100%', padding: '0.6rem 1rem', fontSize: '0.8rem',
                   borderColor: 'rgba(239, 68, 68, 0.25)', color: '#fb7185'
                 }}
               >
-                <Lock size={14} /> Lock Admin Mode (Exit)
+                {isSubmitting ? <Loader2 size={14} className="animate-spin" /> : <Lock size={14} />} Lock Admin Mode (Logout)
               </button>
             </div>
           ) : (
@@ -146,6 +177,7 @@ export default function AdminModal({ isOpen, onClose, onAuthenticate, isAdmin, o
                     className="input-dark w-full"
                     style={{ paddingLeft: '2.5rem', fontSize: '0.85rem' }}
                     autoFocus
+                    required
                   />
                 </div>
               </div>
@@ -164,10 +196,12 @@ export default function AdminModal({ isOpen, onClose, onAuthenticate, isAdmin, o
                     placeholder="Enter Admin Password"
                     className="input-dark w-full"
                     style={{ paddingLeft: '2.5rem', paddingRight: '2.5rem', fontSize: '0.85rem' }}
+                    required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                     style={{
                       position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
                       background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 4
@@ -201,7 +235,7 @@ export default function AdminModal({ isOpen, onClose, onAuthenticate, isAdmin, o
               )}
 
               <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', background: 'var(--bg-input)', padding: '0.6rem 0.85rem', borderRadius: 8, border: '1px solid var(--border-color)', lineHeight: 1.4 }}>
-                💡 <strong>Tip:</strong> Visitors on Vercel get Read-Only view. Only you with the correct Admin credentials can add, edit, or delete books.
+                🔒 <strong>Server-Verified Auth:</strong> Verified with secure HttpOnly cookies. Credentials are never sent to or visible in client JavaScript bundles.
               </div>
 
               <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.25rem' }}>
@@ -215,10 +249,11 @@ export default function AdminModal({ isOpen, onClose, onAuthenticate, isAdmin, o
                 </button>
                 <button
                   type="submit"
+                  disabled={isSubmitting}
                   className="btn-primary flex items-center justify-center gap-1.5"
                   style={{ flex: 1, padding: '0.55rem', fontSize: '0.8rem' }}
                 >
-                  <Unlock size={14} /> Unlock Admin
+                  {isSubmitting ? <Loader2 size={14} className="animate-spin" /> : <Unlock size={14} />} Unlock Admin
                 </button>
               </div>
             </form>
