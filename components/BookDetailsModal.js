@@ -1,6 +1,6 @@
 "use client";
 import { useEffect } from "react";
-import { X, Star, Quote, Calendar, Lightbulb, BookOpen, Trash2, Edit3 } from "lucide-react";
+import { X, Star, Quote, Calendar, Lightbulb, BookOpen, Trash2, Edit3, ExternalLink } from "lucide-react";
 
 const STATUS_MAP = {
   reading:   { label: "Reading",   cls: "badge badge-reading" },
@@ -32,35 +32,18 @@ export default function BookDetailsModal({ isOpen, onClose, book, onOpenEdit, on
       aria-modal="true"
       aria-labelledby="book-modal-title"
       onClick={onClose}
-      style={{
-        position: 'fixed', inset: 0, zIndex: 50,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(10px)',
-        padding: '1rem', overflowY: 'auto'
-      }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto"
     >
       <div
-        style={{
-          width: '100%', maxWidth: 640, overflow: 'hidden',
-          background: 'var(--bg-card)',
-          border: '1px solid var(--border-color)', borderRadius: '1.25rem',
-          boxShadow: 'var(--shadow-lg)',
-          display: 'flex', flexDirection: 'column', margin: 'auto', maxHeight: '90vh'
-        }}
+        className="w-full max-w-xl bg-card border border-color rounded-2xl shadow-2xl overflow-hidden flex flex-col my-auto max-h-[90vh] sm:max-h-[85vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header Cover */}
         <div
-          className={`w-full bg-gradient-to-br ${book.coverGradient || "from-slate-900 to-blue-950"}`}
-          style={{
-            height: 'clamp(130px, 22vw, 175px)',
-            padding: '1.25rem',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            position: 'relative'
-          }}
+          className={`w-full bg-gradient-to-br ${book.coverGradient || "from-slate-900 to-blue-950"} p-4 sm:p-6 flex flex-col justify-between relative`}
+          style={{ minHeight: "clamp(120px, 20vw, 160px)" }}
         >
+
           <div style={{ position: 'absolute', inset: 0, background: 'rgba(12, 14, 20, 0.35)' }} />
 
           <div style={{ zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
@@ -214,14 +197,27 @@ export default function BookDetailsModal({ isOpen, onClose, book, onOpenEdit, on
             </div>
           ) : (
             <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-              Curated by Sojib · Read-Only View
+              Curated by Sojib
             </div>
           )}
-          <button onClick={onClose} className="btn-primary" style={{ padding: '0.45rem 1.35rem', fontSize: '0.75rem' }}>
-            Close
-          </button>
+          <div className="flex items-center gap-2">
+            {book.slug && (
+              <a
+                href={`/book/${book.slug}`}
+                className="btn-ghost flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300"
+                style={{ padding: '0.45rem 0.85rem', fontSize: '0.75rem' }}
+              >
+                <span>Full Page</span>
+                <ExternalLink size={12} />
+              </a>
+            )}
+            <button onClick={onClose} className="btn-primary" style={{ padding: '0.45rem 1.25rem', fontSize: '0.75rem' }}>
+              Close
+            </button>
+          </div>
         </div>
       </div>
     </div>
+
   );
 }

@@ -393,8 +393,28 @@ export default function ReadingRoom3D({ books = [], onSelectBook, onClose }) {
       }
     };
 
+    const handleTouchStart = (e) => {
+      if (e.touches.length > 0) {
+        const touch = e.touches[0];
+        const rect = container.getBoundingClientRect();
+        mouse.x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(interactiveMeshes);
+        if (intersects.length > 0) {
+          const hit = intersects[0].object;
+          if (hit.userData?.book) {
+            onSelectBook(hit.userData.book);
+          }
+        }
+      }
+    };
+
     container.addEventListener("mousemove", handleMouseMove);
     container.addEventListener("click", handleClick);
+    container.addEventListener("touchstart", handleTouchStart, { passive: true });
+
+
 
     // 9. Animation Loop with Camera Interpolation
     let targetCameraPos = STATIONS.stacks.position.clone();
@@ -480,55 +500,57 @@ export default function ReadingRoom3D({ books = [], onSelectBook, onClose }) {
   return (
     <div
       className={`relative w-full rounded-2xl overflow-hidden border border-color bg-slate-950 transition-all duration-300 shadow-2xl ${
-        isFullscreen ? "fixed inset-0 z-50 rounded-none border-none h-screen" : "h-[540px] sm:h-[620px]"
+        isFullscreen ? "fixed inset-0 z-50 rounded-none border-none h-screen" : "h-[360px] sm:h-[480px] md:h-[560px] lg:h-[620px]"
       }`}
     >
       {/* 3D WebGL Canvas Container */}
-      <div ref={mountRef} className="w-full h-full" />
+      <div ref={mountRef} className="w-full h-full touch-none" />
 
       {/* Top Controls Overlay */}
-      <div className="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none z-10">
-        <div className="flex items-center gap-2 bg-slate-900/85 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 shadow-lg pointer-events-auto">
-          <Sparkles size={14} className="text-amber-400" />
-          <span className="text-xs font-bold text-white tracking-wide">
-            Sojib&apos;s Reading Room (3D)
+      <div className="absolute top-2.5 sm:top-4 left-2.5 sm:left-4 right-2.5 sm:right-4 flex items-center justify-between pointer-events-none z-10">
+        <div className="flex items-center gap-1.5 sm:gap-2 bg-slate-900/90 backdrop-blur-md px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl border border-white/10 shadow-lg pointer-events-auto">
+          <Sparkles size={13} className="text-amber-400 flex-shrink-0" />
+          <span className="text-[0.72rem] sm:text-xs font-bold text-white tracking-wide">
+            The Reading Room
           </span>
-          <span className="text-[0.65rem] text-white/50 hidden sm:inline">
-            · Click any 3D book to open
+          <span className="text-[0.62rem] text-white/50 hidden md:inline">
+            · Tap or click any 3D book to open
           </span>
         </div>
 
-        <div className="flex items-center gap-2 pointer-events-auto">
+        <div className="flex items-center gap-1.5 pointer-events-auto">
           {/* Fullscreen Toggle */}
           <button
             onClick={() => setIsFullscreen(!isFullscreen)}
+            aria-label={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
             title={isFullscreen ? "Exit Fullscreen" : "Fullscreen 3D Room"}
-            className="p-2 rounded-xl bg-slate-900/85 backdrop-blur-md text-white/80 hover:text-white border border-white/10 shadow-lg transition-all"
+            className="p-1.5 sm:p-2 rounded-xl bg-slate-900/90 backdrop-blur-md text-white/80 hover:text-white border border-white/10 shadow-lg transition-all"
           >
-            {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+            {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
           </button>
 
           {/* Close 3D View */}
           {onClose && (
             <button
               onClick={onClose}
+              aria-label="Return to 2D Shelf"
               title="Return to 2D Shelf"
-              className="p-2 rounded-xl bg-slate-900/85 backdrop-blur-md text-white/80 hover:text-white border border-white/10 shadow-lg transition-all"
+              className="p-1.5 sm:p-2 rounded-xl bg-slate-900/90 backdrop-blur-md text-white/80 hover:text-white border border-white/10 shadow-lg transition-all"
             >
-              <X size={15} />
+              <X size={14} />
             </button>
           )}
         </div>
       </div>
 
       {/* Station Navigation Rail Overlay (Bottom Left) */}
-      <div className="absolute bottom-4 left-4 z-10 flex items-center gap-1.5 bg-slate-900/85 backdrop-blur-md p-1 rounded-xl border border-white/10 shadow-lg">
-        <span className="text-[0.62rem] font-bold uppercase tracking-wider text-white/50 px-2 hidden sm:inline">
+      <div className="absolute bottom-2.5 sm:bottom-4 left-2.5 sm:left-4 z-10 flex items-center gap-1 bg-slate-900/90 backdrop-blur-md p-1 rounded-xl border border-white/10 shadow-lg max-w-[calc(100%-20px)] sm:max-w-none">
+        <span className="text-[0.6rem] font-bold uppercase tracking-wider text-white/50 px-1.5 hidden md:inline">
           Station:
         </span>
         <button
           onClick={() => setActiveStation("stacks")}
-          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+          className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[0.68rem] sm:text-xs font-semibold transition-all ${
             activeStation === "stacks"
               ? "bg-indigo-600 text-white shadow-sm"
               : "text-white/70 hover:text-white hover:bg-white/10"
@@ -538,7 +560,7 @@ export default function ReadingRoom3D({ books = [], onSelectBook, onClose }) {
         </button>
         <button
           onClick={() => setActiveStation("desk")}
-          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+          className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[0.68rem] sm:text-xs font-semibold transition-all ${
             activeStation === "desk"
               ? "bg-indigo-600 text-white shadow-sm"
               : "text-white/70 hover:text-white hover:bg-white/10"
@@ -548,7 +570,7 @@ export default function ReadingRoom3D({ books = [], onSelectBook, onClose }) {
         </button>
         <button
           onClick={() => setActiveStation("overview")}
-          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+          className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[0.68rem] sm:text-xs font-semibold transition-all ${
             activeStation === "overview"
               ? "bg-indigo-600 text-white shadow-sm"
               : "text-white/70 hover:text-white hover:bg-white/10"
@@ -558,15 +580,15 @@ export default function ReadingRoom3D({ books = [], onSelectBook, onClose }) {
         </button>
       </div>
 
-      {/* Hovered Book Card Overlay (Bottom Right) */}
+      {/* Hovered/Tapped Book Card Overlay (Safe position on mobile) */}
       {hoveredBook && (
-        <div className="absolute bottom-4 right-4 z-10 max-w-xs bg-slate-900/90 backdrop-blur-md p-3.5 rounded-xl border border-amber-400/30 shadow-2xl animate-fade-in pointer-events-none">
+        <div className="absolute bottom-14 sm:bottom-4 right-2.5 sm:right-4 z-10 max-w-[240px] sm:max-w-xs bg-slate-900/95 backdrop-blur-md p-2.5 sm:p-3.5 rounded-xl border border-amber-400/30 shadow-2xl animate-fade-in pointer-events-none">
           <div className="flex items-center justify-between gap-2 mb-1">
-            <span className="text-[0.62rem] uppercase font-bold text-amber-400">
+            <span className="text-[0.6rem] uppercase font-bold text-amber-400 truncate">
               {hoveredBook.genre}
             </span>
             {hoveredBook.rating && (
-              <span className="text-[0.68rem] text-amber-400 font-bold">
+              <span className="text-[0.65rem] text-amber-400 font-bold flex-shrink-0">
                 {hoveredBook.rating} ★
               </span>
             )}
@@ -579,14 +601,15 @@ export default function ReadingRoom3D({ books = [], onSelectBook, onClose }) {
           >
             {hoveredBook.title}
           </h4>
-          <p className="text-[0.7rem] text-white/60">
+          <p className="text-[0.68rem] text-white/60 truncate">
             by {hoveredBook.author}
           </p>
-          <div className="mt-2 text-[0.62rem] text-indigo-400 font-semibold flex items-center gap-1">
-            <Eye size={11} /> Click to open review spread
+          <div className="mt-1.5 text-[0.6rem] text-indigo-400 font-semibold flex items-center gap-1">
+            <Eye size={11} /> Tap to open review
           </div>
         </div>
       )}
     </div>
   );
 }
+

@@ -208,19 +208,20 @@ export default function ReadingRoomApp({ initialBooks = [], initialIsAdmin = fal
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
           
           {/* Brand & Identity */}
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-400 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
-              <Library size={18} />
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-400 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 flex-shrink-0">
+              <Library size={16} className="sm:w-[18px] sm:h-[18px]" />
             </div>
-            <div>
-              <span className="text-base font-bold text-main tracking-tight block leading-none">
+            <div className="min-w-0">
+              <span className="text-sm sm:text-base font-bold text-main tracking-tight block leading-none truncate">
                 Sojib&apos;s Reading Room
               </span>
-              <span className="text-[0.68rem] text-muted font-medium mt-1 block">
+              <span className="text-[0.62rem] sm:text-[0.68rem] text-muted font-medium mt-1 hidden xs:block sm:block truncate">
                 Virtual Library &amp; Literary Archive
               </span>
             </div>
           </div>
+
 
           {/* Navigation Stations */}
           <nav aria-label="Main Navigation" className="hidden md:flex items-center gap-1 bg-surface/60 p-1 rounded-xl border border-color">
@@ -379,18 +380,18 @@ export default function ReadingRoomApp({ initialBooks = [], initialIsAdmin = fal
         {activeTab === "shelf" && (
           <div className="flex flex-col gap-6">
             
-            {/* Search, Filters, and Shelf/Grid View Toggle */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+            {/* Search, Filters, and Shelf/Grid/3D View Toggle */}
+            <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
               
               {/* Search Box with Ctrl+K trigger */}
-              <div className="relative flex-1 max-w-md flex items-center">
+              <div className="relative flex-1 max-w-full lg:max-w-md flex items-center">
                 <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search books, authors, or insights..."
-                  className="input-dark w-full pl-10 pr-20 py-2 text-xs rounded-xl"
+                  className="input-dark w-full pl-10 pr-20 py-2.5 text-xs rounded-xl"
                   aria-label="Search through reading catalogue"
                 />
                 <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
@@ -412,9 +413,8 @@ export default function ReadingRoomApp({ initialBooks = [], initialIsAdmin = fal
                 </div>
               </div>
 
-
               {/* View Switcher & Filters */}
-              <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
+              <div className="flex flex-wrap items-center justify-between sm:justify-start gap-2">
                 
                 {/* Shelf vs Grid vs 3D Room Toggle */}
                 <div className="flex items-center bg-surface border border-color p-0.5 rounded-xl">
@@ -422,70 +422,75 @@ export default function ReadingRoomApp({ initialBooks = [], initialIsAdmin = fal
                     onClick={() => setViewMode("shelf")}
                     aria-label="Bookshelf View"
                     title="Bookshelf Spine View"
-                    className={`p-1.5 rounded-lg text-xs transition-all ${
-                      viewMode === "shelf" ? "bg-indigo-600 text-white shadow-sm" : "text-muted hover:text-main"
+                    className={`px-2.5 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1 ${
+                      viewMode === "shelf" ? "bg-indigo-600 text-white shadow-sm font-semibold" : "text-muted hover:text-main"
                     }`}
                   >
                     <LibraryBig size={14} />
+                    <span className="text-[0.68rem] hidden xs:inline sm:inline">Shelf</span>
                   </button>
                   <button
                     onClick={() => setViewMode("grid")}
                     aria-label="Grid View"
                     title="Card Grid View"
-                    className={`p-1.5 rounded-lg text-xs transition-all ${
-                      viewMode === "grid" ? "bg-indigo-600 text-white shadow-sm" : "text-muted hover:text-main"
+                    className={`px-2.5 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1 ${
+                      viewMode === "grid" ? "bg-indigo-600 text-white shadow-sm font-semibold" : "text-muted hover:text-main"
                     }`}
                   >
                     <LayoutGrid size={14} />
+                    <span className="text-[0.68rem] hidden xs:inline sm:inline">Grid</span>
                   </button>
                   <button
                     onClick={() => setViewMode("3d")}
                     aria-label="3D Reading Room"
                     title="Enter 3D Library Room"
-                    className={`px-2 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1 ${
-                      viewMode === "3d" ? "bg-indigo-600 text-white shadow-sm" : "text-muted hover:text-main"
+                    className={`px-2.5 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1 ${
+                      viewMode === "3d" ? "bg-indigo-600 text-white shadow-sm font-bold" : "text-muted hover:text-main"
                     }`}
                   >
                     <Box size={14} />
-                    <span className="font-bold text-[0.68rem]">3D</span>
+                    <span className="text-[0.68rem]">3D Room</span>
                   </button>
                 </div>
 
-
                 {/* Filter Controls */}
-                <div className="flex items-center gap-1.5 bg-surface border border-color px-2.5 py-1.5 rounded-xl text-xs text-muted">
-                  <Filter size={12} className="text-indigo-400" />
-                  <span className="font-semibold uppercase tracking-wider text-[0.62rem]">Status:</span>
-                  <select
-                    value={selectedStatus}
-                    onChange={(e) => setSelectedStatus(e.target.value)}
-                    className="bg-transparent text-main focus:outline-none cursor-pointer text-xs"
-                  >
-                    <option value="All" style={{ background: 'var(--bg-input-option)' }}>All Statuses</option>
-                    <option value="completed" style={{ background: 'var(--bg-input-option)' }}>Completed</option>
-                    <option value="reading" style={{ background: 'var(--bg-input-option)' }}>Currently Reading</option>
-                    <option value="to-read" style={{ background: 'var(--bg-input-option)' }}>To Read</option>
-                  </select>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <div className="flex items-center gap-1.5 bg-surface border border-color px-2.5 py-1.5 rounded-xl text-xs text-muted">
+                    <Filter size={12} className="text-indigo-400" />
+                    <span className="font-semibold uppercase tracking-wider text-[0.62rem]">Status:</span>
+                    <select
+                      value={selectedStatus}
+                      onChange={(e) => setSelectedStatus(e.target.value)}
+                      className="bg-transparent text-main focus:outline-none cursor-pointer text-xs"
+                    >
+                      <option value="All" style={{ background: 'var(--bg-input-option)' }}>All</option>
+                      <option value="completed" style={{ background: 'var(--bg-input-option)' }}>Completed</option>
+                      <option value="reading" style={{ background: 'var(--bg-input-option)' }}>Reading</option>
+                      <option value="to-read" style={{ background: 'var(--bg-input-option)' }}>To Read</option>
+                    </select>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 bg-surface border border-color px-2.5 py-1.5 rounded-xl text-xs text-muted">
+                    <span className="font-semibold uppercase tracking-wider text-[0.62rem]">Genre:</span>
+                    <select
+                      value={selectedGenre}
+                      onChange={(e) => setSelectedGenre(e.target.value)}
+                      className="bg-transparent text-main focus:outline-none cursor-pointer text-xs max-w-[120px] truncate"
+                    >
+                      {genres.map((g) => (
+                        <option key={g} value={g} style={{ background: 'var(--bg-input-option)' }}>
+                          {g}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-1.5 bg-surface border border-color px-2.5 py-1.5 rounded-xl text-xs text-muted">
-                  <span className="font-semibold uppercase tracking-wider text-[0.62rem]">Genre:</span>
-                  <select
-                    value={selectedGenre}
-                    onChange={(e) => setSelectedGenre(e.target.value)}
-                    className="bg-transparent text-main focus:outline-none cursor-pointer text-xs max-w-[130px] truncate"
-                  >
-                    {genres.map((g) => (
-                      <option key={g} value={g} style={{ background: 'var(--bg-input-option)' }}>
-                        {g}
-                      </option>
-                    ))}
-                  </select>
-                </div>
               </div>
             </div>
 
             {/* Results Count & Filter Reset */}
+
             <div className="flex items-center justify-between text-xs text-muted border-b border-color pb-2">
               <span>
                 Showing <strong className="text-main">{filteredShelfBooks.length}</strong> of {shelfBooks.length} volumes in The Stacks
