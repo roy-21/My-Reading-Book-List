@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
+
 import {
   BookOpen, Search, Filter, Plus, BarChart3,
   Sparkles, Shield, Bookmark, CheckCircle2,
@@ -13,6 +14,7 @@ import BookDetailsModal from "@/components/BookDetailsModal";
 import AdminModal from "@/components/AdminModal";
 import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 import SpineShelf from "@/components/SpineShelf";
+import CommandPalette from "@/components/CommandPalette";
 import { ThemeToggle } from "@/components/ThemeProvider";
 import {
   loginAction,
@@ -33,13 +35,24 @@ export default function ReadingRoomApp({ initialBooks = [], initialIsAdmin = fal
   const [selectedStatus, setSelectedStatus] = useState("All");
   const [activeTab, setActiveTab] = useState("shelf"); // "shelf" | "upcoming" | "analytics"
   const [viewMode, setViewMode] = useState("shelf"); // "shelf" (Spine view) | "grid" (Card view)
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+
+  // Global open-command-palette event listener
+  useEffect(() => {
+    const handleOpen = () => setIsCommandPaletteOpen(true);
+    window.addEventListener("open-command-palette", handleOpen);
+    return () => window.removeEventListener("open-command-palette", handleOpen);
+  }, []);
+
 
   // Modals
   const [detailsBook, setDetailsBook] = useState(null);
+
   const [bookToEdit, setBookToEdit] = useState(null);
   const [isBookModalOpen, setIsBookModalOpen] = useState(false);
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
+
 
   // Derived Book Subsets
   const shelfBooks = useMemo(() => {
@@ -347,26 +360,36 @@ export default function ReadingRoomApp({ initialBooks = [], initialIsAdmin = fal
             {/* Search, Filters, and Shelf/Grid View Toggle */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
               
-              {/* Search Box */}
-              <div className="relative flex-1 max-w-md">
+              {/* Search Box with Ctrl+K trigger */}
+              <div className="relative flex-1 max-w-md flex items-center">
                 <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search books, authors, or insights..."
-                  className="input-dark w-full pl-10 pr-4 py-2 text-xs rounded-xl"
+                  className="input-dark w-full pl-10 pr-20 py-2 text-xs rounded-xl"
                   aria-label="Search through reading catalogue"
                 />
-                {searchQuery && (
+                <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery("")}
+                      className="text-xs text-muted hover:text-main px-1"
+                    >
+                      Clear
+                    </button>
+                  )}
                   <button
-                    onClick={() => setSearchQuery("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted hover:text-main"
+                    onClick={() => setIsCommandPaletteOpen(true)}
+                    title="Open Command Palette (Ctrl+K)"
+                    className="hidden sm:inline-flex items-center gap-0.5 text-[0.62rem] font-medium text-muted bg-surface border border-color px-1.5 py-0.5 rounded-md hover:text-indigo-400 hover:border-indigo-500/30 transition-all cursor-pointer"
                   >
-                    Clear
+                    <kbd>Ctrl</kbd>+<kbd>K</kbd>
                   </button>
-                )}
+                </div>
               </div>
+
 
               {/* View Switcher & Filters */}
               <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
@@ -638,6 +661,14 @@ export default function ReadingRoomApp({ initialBooks = [], initialIsAdmin = fal
         isAdmin={isAdmin}
         onLogout={handleLogout}
       />
+
+      <CommandPalette
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+        books={shelfBooks}
+        onSelectBook={(book) => setDetailsBook(book)}
+      />
     </div>
   );
 }
+
