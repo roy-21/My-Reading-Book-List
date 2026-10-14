@@ -306,13 +306,50 @@ export default function ReadingRoomApp({ initialBooks = [], initialIsAdmin = fal
       </header>
 
       {/* Main Content Area */}
-      <main id="main-content" className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-8">
+      <main id="main-content" className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-8 flex flex-col gap-6 sm:gap-8">
         
+        {/* Mobile Station Navigation (Directly accessible at top of content on mobile) */}
+        <div className="flex md:hidden items-center justify-between bg-surface p-1 rounded-xl border border-color shadow-sm gap-1">
+          <button
+            onClick={() => setActiveTab("shelf")}
+            className={`flex-1 py-2 text-xs font-semibold rounded-lg text-center flex items-center justify-center gap-1.5 transition-all ${
+              activeTab === "shelf"
+                ? "bg-indigo-600 text-white shadow-sm"
+                : "text-muted hover:text-main"
+            }`}
+          >
+            <BookOpen size={13} />
+            <span>Stacks ({shelfBooks.length})</span>
+          </button>
+          <button
+            onClick={() => setActiveTab("upcoming")}
+            className={`flex-1 py-2 text-xs font-semibold rounded-lg text-center flex items-center justify-center gap-1.5 transition-all ${
+              activeTab === "upcoming"
+                ? "bg-indigo-600 text-white shadow-sm"
+                : "text-muted hover:text-main"
+            }`}
+          >
+            <Bookmark size={13} />
+            <span>Queue ({upcomingBooks.length})</span>
+          </button>
+          <button
+            onClick={() => setActiveTab("analytics")}
+            className={`flex-1 py-2 text-xs font-semibold rounded-lg text-center flex items-center justify-center gap-1.5 transition-all ${
+              activeTab === "analytics"
+                ? "bg-indigo-600 text-white shadow-sm"
+                : "text-muted hover:text-main"
+            }`}
+          >
+            <BarChart3 size={13} />
+            <span>Ledger</span>
+          </button>
+        </div>
+
         {/* Hero Section: Quote Spotlight & Literary Atmosphere */}
         {featuredQuote && activeTab === "shelf" && (
           <section
             aria-label="Spotlight Quote"
-            className="surface relative overflow-hidden rounded-2xl p-6 sm:p-8 border border-color"
+            className="surface relative overflow-hidden rounded-2xl p-4 sm:p-7 border border-color"
           >
             <div className="absolute top-0 right-0 -mt-8 -mr-8 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
             <div className="flex flex-col gap-3 relative z-10">
@@ -321,11 +358,11 @@ export default function ReadingRoomApp({ initialBooks = [], initialIsAdmin = fal
                   <Sparkles size={11} />
                   Spotlight Quote
                 </span>
-                <span className="text-xs text-muted">from {featuredQuote.title}</span>
+                <span className="text-xs text-muted truncate">from {featuredQuote.title}</span>
               </div>
               <blockquote
                 lang={hasBengali(featuredQuote.quote) ? "bn" : "en"}
-                className={`text-lg sm:text-xl font-medium text-main italic leading-relaxed max-w-3xl ${
+                className={`text-base sm:text-xl font-medium text-main italic leading-relaxed max-w-3xl ${
                   hasBengali(featuredQuote.quote) ? "font-bengali-serif" : ""
                 }`}
               >
@@ -345,40 +382,11 @@ export default function ReadingRoomApp({ initialBooks = [], initialIsAdmin = fal
               </div>
             </div>
           </section>
-
         )}
-
-        {/* Mobile Tab Navigation */}
-        <div className="flex md:hidden items-center justify-between bg-surface p-1 rounded-xl border border-color">
-          <button
-            onClick={() => setActiveTab("shelf")}
-            className={`flex-1 py-1.5 text-xs font-semibold rounded-lg text-center ${
-              activeTab === "shelf" ? "bg-indigo-600 text-white" : "text-muted"
-            }`}
-          >
-            Stacks ({shelfBooks.length})
-          </button>
-          <button
-            onClick={() => setActiveTab("upcoming")}
-            className={`flex-1 py-1.5 text-xs font-semibold rounded-lg text-center ${
-              activeTab === "upcoming" ? "bg-indigo-600 text-white" : "text-muted"
-            }`}
-          >
-            Queue ({upcomingBooks.length})
-          </button>
-          <button
-            onClick={() => setActiveTab("analytics")}
-            className={`flex-1 py-1.5 text-xs font-semibold rounded-lg text-center ${
-              activeTab === "analytics" ? "bg-indigo-600 text-white" : "text-muted"
-            }`}
-          >
-            Ledger
-          </button>
-        </div>
 
         {/* Active View: The Stacks (Shelf) */}
         {activeTab === "shelf" && (
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-5 sm:gap-6">
             
             {/* Search, Filters, and Shelf/Grid/3D View Toggle */}
             <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
@@ -391,7 +399,8 @@ export default function ReadingRoomApp({ initialBooks = [], initialIsAdmin = fal
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search books, authors, or insights..."
-                  className="input-dark w-full pl-10 pr-20 py-2.5 text-xs rounded-xl"
+                  style={{ paddingLeft: '2.5rem', paddingRight: '5rem' }}
+                  className="input-dark w-full py-2.5 text-xs rounded-xl"
                   aria-label="Search through reading catalogue"
                 />
                 <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
@@ -414,54 +423,54 @@ export default function ReadingRoomApp({ initialBooks = [], initialIsAdmin = fal
               </div>
 
               {/* View Switcher & Filters */}
-              <div className="flex flex-wrap items-center justify-between sm:justify-start gap-2">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
                 
                 {/* Shelf vs Grid vs 3D Room Toggle */}
-                <div className="flex items-center bg-surface border border-color p-0.5 rounded-xl">
+                <div className="flex items-center justify-between sm:justify-start bg-surface border border-color p-0.5 rounded-xl">
                   <button
                     onClick={() => setViewMode("shelf")}
                     aria-label="Bookshelf View"
                     title="Bookshelf Spine View"
-                    className={`px-2.5 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1 ${
+                    className={`flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs transition-all flex items-center justify-center gap-1.5 ${
                       viewMode === "shelf" ? "bg-indigo-600 text-white shadow-sm font-semibold" : "text-muted hover:text-main"
                     }`}
                   >
                     <LibraryBig size={14} />
-                    <span className="text-[0.68rem] hidden xs:inline sm:inline">Shelf</span>
+                    <span className="text-[0.7rem]">Shelf</span>
                   </button>
                   <button
                     onClick={() => setViewMode("grid")}
                     aria-label="Grid View"
                     title="Card Grid View"
-                    className={`px-2.5 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1 ${
+                    className={`flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs transition-all flex items-center justify-center gap-1.5 ${
                       viewMode === "grid" ? "bg-indigo-600 text-white shadow-sm font-semibold" : "text-muted hover:text-main"
                     }`}
                   >
                     <LayoutGrid size={14} />
-                    <span className="text-[0.68rem] hidden xs:inline sm:inline">Grid</span>
+                    <span className="text-[0.7rem]">Grid</span>
                   </button>
                   <button
                     onClick={() => setViewMode("3d")}
                     aria-label="3D Reading Room"
                     title="Enter 3D Library Room"
-                    className={`px-2.5 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1 ${
+                    className={`flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs transition-all flex items-center justify-center gap-1.5 ${
                       viewMode === "3d" ? "bg-indigo-600 text-white shadow-sm font-bold" : "text-muted hover:text-main"
                     }`}
                   >
                     <Box size={14} />
-                    <span className="text-[0.68rem]">3D Room</span>
+                    <span className="text-[0.7rem]">3D Room</span>
                   </button>
                 </div>
 
-                {/* Filter Controls */}
-                <div className="flex items-center gap-2 flex-wrap">
-                  <div className="flex items-center gap-1.5 bg-surface border border-color px-2.5 py-1.5 rounded-xl text-xs text-muted">
-                    <Filter size={12} className="text-indigo-400" />
-                    <span className="font-semibold uppercase tracking-wider text-[0.62rem]">Status:</span>
+                {/* Filter Controls: 2 clean columns on mobile */}
+                <div className="grid grid-cols-2 sm:flex sm:items-center gap-2">
+                  <div className="flex items-center gap-1.5 bg-surface border border-color px-2.5 py-1.5 rounded-xl text-xs text-muted min-w-0">
+                    <Filter size={12} className="text-indigo-400 flex-shrink-0" />
+                    <span className="font-semibold uppercase tracking-wider text-[0.62rem] flex-shrink-0">Status:</span>
                     <select
                       value={selectedStatus}
                       onChange={(e) => setSelectedStatus(e.target.value)}
-                      className="bg-transparent text-main focus:outline-none cursor-pointer text-xs"
+                      className="bg-transparent text-main focus:outline-none cursor-pointer text-xs w-full truncate"
                     >
                       <option value="All" style={{ background: 'var(--bg-input-option)' }}>All</option>
                       <option value="completed" style={{ background: 'var(--bg-input-option)' }}>Completed</option>
@@ -470,12 +479,12 @@ export default function ReadingRoomApp({ initialBooks = [], initialIsAdmin = fal
                     </select>
                   </div>
 
-                  <div className="flex items-center gap-1.5 bg-surface border border-color px-2.5 py-1.5 rounded-xl text-xs text-muted">
-                    <span className="font-semibold uppercase tracking-wider text-[0.62rem]">Genre:</span>
+                  <div className="flex items-center gap-1.5 bg-surface border border-color px-2.5 py-1.5 rounded-xl text-xs text-muted min-w-0">
+                    <span className="font-semibold uppercase tracking-wider text-[0.62rem] flex-shrink-0">Genre:</span>
                     <select
                       value={selectedGenre}
                       onChange={(e) => setSelectedGenre(e.target.value)}
-                      className="bg-transparent text-main focus:outline-none cursor-pointer text-xs max-w-[120px] truncate"
+                      className="bg-transparent text-main focus:outline-none cursor-pointer text-xs w-full truncate"
                     >
                       {genres.map((g) => (
                         <option key={g} value={g} style={{ background: 'var(--bg-input-option)' }}>

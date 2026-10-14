@@ -80,7 +80,7 @@ export default function CommandPalette({ isOpen, onClose, books = [], onSelectBo
       aria-modal="true"
       aria-label="Quick Search Command Palette"
       onClick={onClose}
-      className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4 bg-slate-950/80 backdrop-blur-md animate-fade-in"
+      className="fixed inset-0 z-50 flex items-start justify-center pt-6 sm:pt-20 px-3 sm:px-4 bg-slate-950/80 backdrop-blur-md animate-fade-in"
     >
       <div
         onClick={(e) => e.stopPropagation()}
